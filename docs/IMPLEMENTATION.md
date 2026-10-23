@@ -48,9 +48,10 @@ merge/release it through its normal workflow and replace the development pin wit
 - Magely: 2 pre-existing failing files (4 assertions total): test_stub expects build/date 70205;
   test_manifest has the same missing Tools exclusion. Both suites reproduce the identical
   failures against unchanged r31. Their other tests pass. No unrelated fixes were applied.
-- Local package: 46 runtime files; verified exact contents, dependency bytes, licenses, logo,
-  and version replacement. Hosted package CI has not run.
-  Final artifact: `.work/Buffy-dev.zip`; unpacked contents: `.work/package-final/Buffy`.
+- Initial local package: 46 files. The first hosted package check exposed a missing
+  LibGroupBuffs LICENSE in the local shipping manifest. The manifest now requires the license,
+  bringing local staging and the hosted package to 47 files, with exact dependency byte checks.
+  The original development artifact and deployment predate this packaging correction.
 
 Representative commands (from Buffy unless noted):
 

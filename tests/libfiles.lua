@@ -25,8 +25,8 @@
 -- As a script:  lua tests/libfiles.lua <root> load|ship [<LibGlass root>]
 --               lua tests/libfiles.lua --glass <LibGlass root> load|ship
 --   load  - the Lua files, in the order the client runs them
---   ship  - every file that must be present: XMLs, Lua files, and for
---           LibGlass its LICENSE and textures
+--   ship  - every file that must be present: XMLs, Lua files, each library's
+--           LICENSE, and LibGlass textures
 --   Exits non-zero, naming the file, if anything listed does not exist.
 ------------------------------------------------------------
 
@@ -130,6 +130,8 @@ end
 function L.resolve(root, entry, glassRoot)
     entry = entry or L.ENTRY
     local load, ship, sources = readXml(root, entry)
+    if not read(root .. "/LICENSE") then error(nameOf(entry) .. ": LICENSE not found in " .. root, 0) end
+    ship[#ship + 1] = "LICENSE"
     if glassRoot then
         local count = 0
         for tex, by in pairs(L.drawn(load, sources)) do

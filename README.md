@@ -4,6 +4,8 @@ A group buff manager for **World of Warcraft: Forever**, automatically choosing 
 Druid, or Mage behavior. Buffy combines Priestly, Wildly, and Magely through their shared
 LibGroupBuffs engine and LibGlass window.
 
+![Buffy in action with Lord Kazzak in the background](docs/screenshots/buffy-kazzak-gameplay-v1.gif)
+
 | Class | Buffs |
 | --- | --- |
 | Priest | Fortitude, Spirit, Shadow Protection; instance and aura detection modes |
@@ -14,6 +16,8 @@ Left-click a row to cast a group buff when learned, or a single buff otherwise. 
 casts a single buff on the first eligible member missing it. Hover for individual member
 buttons. Reagent counters appear for the spells you know. Secure window changes wait until
 combat ends. Unsupported classes create no buff window.
+
+![Buffy tracking Arcane Intellect across two groups and pets, with individual member buff status](docs/screenshots/buffy-mage-raid.png)
 
 ## Commands and settings
 

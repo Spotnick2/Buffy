@@ -26,6 +26,19 @@ H.eq(#B.engine:MembersFor(fort, members), 2, "fortitude excludes hunter pets")
 local shadow = B.class.defs[3]
 local groups, ord = { [1] = { { unit = "player", class = "PRIEST" } } }, { 1 }
 H.eq(B.IsVisible(shadow, groups, ord), false, "detect hidden without aura")
+H.eq(B.Get("shadowInBG"), false, "battleground override defaults off")
+WoW.instanceName, WoW.instanceType = "Warsong Gulch", "pvp"
+H.eq(B.IsVisible(shadow, groups, ord), false, "battleground retains detect when disabled")
+B.SetConfig("shadowInBG", true)
+for _, mode in ipairs({ "detect", "instance", "always" }) do
+    B.SetConfig("shadowMode", mode)
+    H.eq(B.IsVisible(shadow, groups, ord), true, "battleground override in " .. mode)
+end
+B.SetConfig("shadowMode", "detect")
+WoW.instanceType = "arena"
+H.eq(B.IsVisible(shadow, groups, ord), false, "arena is separate from battleground")
+WoW.instanceType = "none"
+H.eq(B.IsVisible(shadow, groups, ord), false, "leaving battleground restores detection")
 WoW.SetAura("player", shadow.sngl, 600, 300, shadow.snglID)
 H.eq(B.IsVisible(shadow, groups, ord), true, "detect visible with aura")
 WoW.locale = "frFR"

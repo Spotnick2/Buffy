@@ -39,13 +39,18 @@ local DEFAULTS = {
     trackFort       = true,
     trackSpirit     = true,
     shadowMode      = "detect",   -- "always" | "detect" | "instance"
+    shadowInBG      = false,
     showSolo        = false,
     trackPets       = true,
     frameAlpha      = 0.96,
     frameScale      = 1.00,
+    growDirection   = "down",
     popoverSide     = "auto",     -- "auto" | "left" | "right"
     lockFrame       = false,
     showClickHints  = true,
+    showReagents    = true,
+    autoBuyCandles  = false,
+    candleTarget    = 80,
 }
 DEFAULTS.frameScale = 1
 C.defs, C.defaults = DEFS, DEFAULTS
@@ -82,15 +87,16 @@ local function GetPrayerRank()
     return (API.GetSpellRank(fort.grp))
 end
 
-local function GetCandleInfo()
-    local rank = GetPrayerRank()
-    if rank == nil then return nil, nil, nil end
-    if rank <= 0 then return nil, nil, nil end
-    if rank == 1 then
-        return HOLY_CANDLE_ID, ItemIcon(HOLY_CANDLE_ID), "Holy Candle"
-    else
-        return SACRED_CANDLE_ID, ItemIcon(SACRED_CANDLE_ID), "Sacred Candle"
+local function CandleItems()
+    local items = {}
+    local fortRank = GetPrayerRank()
+    if fortRank == 1 then items[#items + 1] = HOLY_CANDLE_ID end
+    if (fortRank and fortRank > 1)
+        or (API.GetSpellRank(DEFS[2].grp) or 0) > 0
+        or (API.GetSpellRank(DEFS[3].grp) or 0) > 0 then
+        items[#items + 1] = SACRED_CANDLE_ID
     end
+    return items
 end
 
 
@@ -98,10 +104,9 @@ local LEVITATE_ID = 1706
 
 local function FooterItems()
     local items = {}
-    local candleID, candleIcon = GetCandleInfo()
-    if candleID then
+    for _, candleID in ipairs(CandleItems()) do
         items[#items + 1] = {
-            itemID = candleID, icon = candleIcon, usedBy = "the group Prayers",
+            itemID = candleID, icon = ItemIcon(candleID), usedBy = "group Prayers",
             color = function(count)
                 if count >= 50 then return 0.20, 1.00, 0.20 end
                 if count >= 25 then return 1.00, 0.88, 0.10 end
@@ -124,6 +129,19 @@ end
 C.membersFor = EligibleMembers
 C.appearance = function() return { icon = GetSpecIcon() } end
 C.footerItems = FooterItems
+C.candleItems = CandleItems
+C.restock = {
+    enabledKey = "autoBuyCandles", targetKey = "candleTarget",
+    label = "Buy candles at vendors to reach target", targetLabel = "Candle target per type",
+    items = CandleItems,
+    names = { [HOLY_CANDLE_ID] = "Holy Candles", [SACRED_CANDLE_ID] = "Sacred Candles" },
+}
+C.previewFooterItems = function()
+    return {
+        { itemID = HOLY_CANDLE_ID, icon = ItemIcon(HOLY_CANDLE_ID), usedBy = "Prayer of Fortitude" },
+        { itemID = LIGHT_FEATHER_ID, icon = ItemIcon(LIGHT_FEATHER_ID), usedBy = "Levitate" },
+    }
+end
 C.refresh = function() GetPrayerRank() end
 C.icon = PRIEST_ICON
 C.enabledKeys = { fort = "trackFort", spirit = "trackSpirit" }

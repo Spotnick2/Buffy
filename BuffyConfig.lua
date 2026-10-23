@@ -81,9 +81,19 @@ function B.InitConfig()
     if db.popoverSide ~= "auto" and db.popoverSide ~= "left" and db.popoverSide ~= "right" then
         settings:Set("popoverSide", "auto")
     end
+    if db.growDirection ~= "down" and db.growDirection ~= "up" then
+        settings:Set("growDirection", "down")
+    end
     for _, opt in ipairs({ { "frameAlpha", 0, 1, 0.96 }, { "frameScale", 0.5, 2.5, 1 } }) do
         local n = db[opt[1]]
         if type(n) ~= "number" or n ~= n or n < opt[2] or n > opt[3] then settings:Set(opt[1], opt[4]) end
+    end
+    local targetKey = B.class.restock and B.class.restock.targetKey
+    if targetKey then
+        local n = db[targetKey]
+        if type(n) ~= "number" or n ~= n or n < 1 or n > 200 or n ~= math.floor(n) then
+            settings:Set(targetKey, 80)
+        end
     end
     if B.WindowState("visible") == nil then B.SetWindowState("visible", true) end
     build = API.ClientBuild() or "?"
@@ -131,6 +141,10 @@ end
 function B.IsVisible(def, groups, ord)
     local key = B.class.modeKeys[def.id]
     if not key then return true end
+    if B.classToken == "PRIEST" and def.id == "shadow" and B.Get("shadowInBG") == true then
+        local _, kind = GetInstanceInfo()
+        if kind == "pvp" then return true end
+    end
     local mode = B.Get(key)
     if mode == "always" then return true end
     if mode == "detect" then

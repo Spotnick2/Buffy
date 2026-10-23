@@ -1,0 +1,21 @@
+## Interface: 16001
+## Title: Buffy
+## Notes: Priest, Druid, and Mage group buff management for WoW: Forever.
+## Author: Spotnick
+## Version: @project-version@
+## SavedVariables: BuffyAccountDB
+## SavedVariablesPerCharacter: BuffyDB
+## OptionalDeps: GlassUI
+## IconTexture: Interface\AddOns\Buffy\Media\Logo
+## X-Curse-Project-ID: 1760483
+
+Libs\LibGlass-1.0\LibGlass-1.0.xml
+Libs\LibGroupBuffs-1.0\LibGroupBuffs-1.0.xml
+BuffyCompat.lua
+Classes/Priest.lua
+Classes/Druid.lua
+Classes/Mage.lua
+BuffyConfig.lua
+BuffyAppearance.lua
+BuffyOptions.lua
+Buffy.lua

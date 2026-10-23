@@ -1,0 +1,38 @@
+name: Package check
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install Lua 5.1
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lua5.1
+      - name: Fetch pinned libraries
+        run: |
+          bash tests/fetch_external.sh Libs/LibGlass-1.0 "$RUNNER_TEMP/LibGlass"
+          bash tests/fetch_external.sh Libs/LibGroupBuffs-1.0 "$RUNNER_TEMP/LibGroupBuffs"
+          echo "LIBGLASS=$RUNNER_TEMP/LibGlass" >> "$GITHUB_ENV"
+          echo "LIBGROUPBUFFS=$RUNNER_TEMP/LibGroupBuffs" >> "$GITHUB_ENV"
+      - name: Syntax and behavior
+        run: |
+          luac5.1 -p Buffy*.lua Classes/*.lua "$LIBGROUPBUFFS/LibGroupBuffs.lua"
+          for f in tests/test_*.lua; do lua5.1 "$f"; done
+      - name: Package without publishing
+        uses: BigWigsMods/packager@v2
+        with:
+          args: -d
+      - name: Verify exact runtime contents
+        run: python3 tests/check_package.py .release/*.zip --lua lua5.1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Buffy-package
+          path: .release/*.zip

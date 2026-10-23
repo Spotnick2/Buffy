@@ -111,6 +111,26 @@ WoW.dispatch("MERCHANT_SHOW")
 H.eq(#WoW.purchases, 1, "shared money budget prevents overspending on second candle")
 H.eq(WoW.purchases[1].quantity, 10, "first candle uses affordable amount")
 
+B = H.load("PRIEST")
+B.SetConfig("autoBuyCandles", true)
+B.SetConfig("trackFort", false)
+WoW.Know(21562, "Prayer of Fortitude", "Rank 1")
+shop(17028, 100, -1, 1)
+WoW.money = 100000
+WoW.dispatch("MERCHANT_SHOW")
+H.eq(#WoW.purchases, 0, "disabled Fortitude buys no Holy Candles")
+H.eq(#B.class.candleItems(), 0, "disabled Fortitude contributes no candle")
+
+B = H.load("PRIEST")
+B.SetConfig("autoBuyCandles", true)
+B.SetConfig("trackSpirit", false)
+WoW.Know(27681, "Prayer of Spirit", "Rank 1")
+shop(17029, 100, -1, 1)
+WoW.money = 100000
+WoW.dispatch("MERCHANT_SHOW")
+H.eq(#WoW.purchases, 0, "disabled Spirit buys no Sacred Candles")
+H.eq(#B.class.candleItems(), 0, "disabled Spirit contributes no candle")
+
 B = H.load("DRUID")
 shop(17028, 100, -1, 1)
 WoW.money = 100000

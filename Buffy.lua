@@ -37,6 +37,10 @@ function B.OnConfigChanged(key)
     if not B.ui or not loggedIn then return end
     if key == "learnedDurations" or key == "pos" or key == "visible" then return end
     if B.previewActive then
+        if key == "showSolo" then
+            B.previewSoloToggles = B.previewSoloToggles or {}
+            B.previewSoloToggles[#B.previewSoloToggles + 1] = B.Get("showSolo") == true
+        end
         if InCombatLockdown() then B.previewRefreshPending = true else B.ui:Update() end
         return
     end
@@ -110,14 +114,20 @@ local function EndPreview()
     B.previewRefreshPending = nil
     B.previewActive = nil
     B.ui:SetPreview(nil)
+    B.ui:Close()
+    if B.class.forgetRoster then B.class.forgetRoster() end
+    B.engine:PruneCache()
     RefreshSpells()
-    if B.previewWasVisible then B.ui:Update() else B.ui:Close() end
-    B.previewWasVisible = nil
+    for _, enabled in ipairs(B.previewSoloToggles or {}) do B.visibility:SoloToggled(enabled) end
+    B.previewSoloToggles = nil
+    if B.previewJoinedPending then B.visibility:GroupJoined() end
+    B.previewJoinedPending = nil
+    B.visibility:RosterChanged()
+    B.visibility:ContentChanged()
 end
 
 local function StartPreview(groups)
     if InCombatLockdown() then B.Say("Test mode can only start outside combat."); return end
-    if not B.previewActive then B.previewWasVisible = B.ui:IsVisible() end
     B.previewActive = true
     B.ui:SetPreview(groups)
     B.ui:Update()
@@ -195,6 +205,7 @@ events:SetScript("OnEvent", function(_, event, arg1, arg2)
     if event == "MERCHANT_SHOW" then B.RestockReagents(); return end
     if event == "BAG_UPDATE_DELAYED" then ReportRestock(); return end
     if B.previewActive and event ~= "PLAYER_REGEN_ENABLED" then
+        if event == "GROUP_JOINED" then B.previewJoinedPending = true end
         if event == "PLAYER_ENTERING_WORLD" then B.EnteringWorld(arg1, arg2) end
         return
     end

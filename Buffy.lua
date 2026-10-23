@@ -2,7 +2,7 @@
 local B = Buffy
 if not B.API then return end
 local API, GB = B.API, B.GB
-local initialized, loggedIn, warnedNames, warnedRank
+local initialized, loggedIn, warnedNames, warnedRank, auraVisibilityPending
 
 function B.Say(text)
     if DEFAULT_CHAT_FRAME then DEFAULT_CHAT_FRAME:AddMessage("|cff99ddff[Buffy]|r " .. text) end
@@ -119,9 +119,12 @@ events:SetScript("OnEvent", function(_, event, arg1, arg2)
     elseif event == "READY_CHECK" then vis:ReadyCheck()
     elseif event == "UNIT_AURA" then
         if engine:AuraEventIsRelevant(arg1, arg2) then
-            if not ui:IsVisible() and B.class.reopenForAura and not InCombatLockdown() then
-                vis:ContentChanged()
-            else ui:ScheduleRefresh() end
+            if not ui:IsVisible() and B.class.reopenForAura then
+                if InCombatLockdown() then auraVisibilityPending = true
+                else vis:ContentChanged() end
+            else
+                ui:ScheduleRefresh()
+            end
         end
     elseif event == "UNIT_PET" then ui:ScheduleRefresh()
     elseif event == "GROUP_JOINED" then
@@ -137,7 +140,12 @@ events:SetScript("OnEvent", function(_, event, arg1, arg2)
         RefreshSpells()
         ui:ApplyAppearance()
         if ui:IsVisible() and InCombatLockdown() then ui:RefreshFooter() else vis:ContentChanged() end
-    elseif event == "PLAYER_REGEN_ENABLED" then ui:OnCombatEnd()
+    elseif event == "PLAYER_REGEN_ENABLED" then
+        ui:OnCombatEnd()
+        if auraVisibilityPending then
+            auraVisibilityPending = nil
+            vis:ContentChanged()
+        end
     elseif event == "BAG_UPDATE" and ui:IsVisible() then ui:RefreshFooter() end
 end)
 

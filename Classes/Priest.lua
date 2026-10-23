@@ -128,6 +128,7 @@ C.refresh = function() GetPrayerRank() end
 C.icon = PRIEST_ICON
 C.enabledKeys = { fort = "trackFort", spirit = "trackSpirit" }
 C.modeKeys = { shadow = "shadowMode" }
+C.reopenForAura = true
 local INSTANCE_DB = {
     { name = "The Barrow Deeps", category = "Raids", default = true,
       tooltip = "10 player. NEW in Forever. Encounters are not catalogued yet - pre-checked because a raid "

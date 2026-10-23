@@ -6,18 +6,17 @@ with a development library pin; it is not the final v0.1.0 archive.
 
 ## Companion work
 
-1. The owner reviews and merges [LibGroupBuffs #69](https://github.com/Spotnick2/LibGroupBuffs/pull/69).
-   Its CI passed and it is mergeable. Confirm the merged minor is 32, run the
-   library suite and Priestly consumer suite against the merge commit, and
-   validate that exact library build in game through a consumer. Then tag the
-   library merge commit `r32` and push the tag. Never move an existing tag.
+1. [LibGroupBuffs #69](https://github.com/Spotnick2/LibGroupBuffs/pull/69)
+   merged as `b51d77573924b802b28561b028c4dc125fcdadbe`. Its CI passed,
+   the merge tree matches the reviewed head, and the owner confirmed the
+   merged library works in game. The published `r32` tag points to that merge.
 2. The owner reviews and merges [GlassUI #160](https://github.com/Spotnick2/GlassUI/pull/160).
    Its CI passed and it is mergeable. Buffy works without it, but following
    GlassUI from the hub needs that roster entry.
-3. Replace Buffy's `.pkgmeta` LibGroupBuffs `commit:` pin with `tag: r32` after
-   the tag exists. Confirm the tag contains the same tested library behavior,
-   run `pwsh tests/run.ps1 -Library <r32-checkout> -LibGlass <r11-checkout>`,
-   and let the PR package check verify the embedded files.
+3. Buffy's `.pkgmeta` now pins LibGroupBuffs with `tag: r32`. The Buffy,
+   LibGroupBuffs, and Priestly suites passed against the `r32` checkout and
+   LibGlass `r11`; the local staged package passed the 47-file byte check.
+   Confirm the PR package check also passes with this pin.
 
 ## GitHub and CurseForge
 

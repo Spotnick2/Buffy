@@ -11,6 +11,11 @@ Individual checklist scenarios were not specified, so this records general succe
 on Priest and Mage and Mark of the Wild on Druid without marking every scenario below as verified.
 Other Druid behavior, including Thorns modes and Gift of the Wild, was not specified.
 
+On 2026-10-23, after LibGroupBuffs PR #69 merged and its merge commit
+`b51d77573924b802b28561b028c4dc125fcdadbe` was tagged `r32`, the owner
+reported that the in-game check works. No class, client build, or individual
+steps were specified for this check, so the detailed scenarios below remain open.
+
 ## Detailed checklist
 
 Not performed by offline tests. Use the exact companion library revision and GlassUI roster

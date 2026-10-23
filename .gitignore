@@ -1,0 +1,6 @@
+Libs/
+.work/
+*.zip
+*.luac
+luac.out
+.release/

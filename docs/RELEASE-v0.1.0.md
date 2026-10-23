@@ -10,13 +10,13 @@ with a development library pin; it is not the final v0.1.0 archive.
    merged as `b51d77573924b802b28561b028c4dc125fcdadbe`. Its CI passed,
    the merge tree matches the reviewed head, and the owner confirmed the
    merged library works in game. The published `r32` tag points to that merge.
-2. The owner reviews and merges [GlassUI #160](https://github.com/Spotnick2/GlassUI/pull/160).
-   Its CI passed and it is mergeable. Buffy works without it, but following
-   GlassUI from the hub needs that roster entry.
-3. Buffy's `.pkgmeta` now pins LibGroupBuffs with `tag: r32`. The Buffy,
+2. Buffy's `.pkgmeta` now pins LibGroupBuffs with `tag: r32`. The Buffy,
    LibGroupBuffs, and Priestly suites passed against the `r32` checkout and
    LibGlass `r11`; the local staged package passed the 47-file byte check.
-   Confirm the PR package check also passes with this pin.
+   The PR package check also passed with this pin.
+
+[GlassUI #160](https://github.com/Spotnick2/GlassUI/pull/160) and its hub
+roster entry are deferred until after v0.1.0; they are not release prerequisites.
 
 ## GitHub and CurseForge
 

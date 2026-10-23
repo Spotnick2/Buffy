@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.1.1-alpha1
+
+- Add a battleground option for Priest Shadow Protection.
+- Add up/down window growth and `/buffy test [5|8|off]` to preview group layouts.
+- Add a reagent footer visibility option for each class.
+- Add optional vendor restocking for Priest candles, Druid Gift reagents, and Mage Arcane Powder.
+- This alpha has passed offline tests and package validation; the new behavior still needs in-game checks.
+
 ## v0.1.0
 
 - Initial Forever addon with automatic Priest, Druid, and Mage selection.

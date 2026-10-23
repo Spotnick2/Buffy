@@ -67,9 +67,11 @@ counts and money, and the result for each check.
 - For Druid and Mage purchases, also check the target, limited stock, money, bag space,
   repeated visits, wrong vendors, extended costs, and inventory-based messages.
 
-After the library change is merged, update Buffy to the merge commit and repeat the in-game
-checks on that exact revision. Tag the validated merge commit `r33`, then replace Buffy's
-development commit pin with that immutable tag before releasing Buffy.
+The owner chose an alpha release before these in-game checks because the beta is closing.
+Buffy may ship `v0.1.1-alpha1` after the companion PRs merge and package CI passes, using
+the published immutable LibGroupBuffs commit pin above. Do not mark these scenarios as
+verified. When the game is available again, test the exact merged library revision; then
+tag it `r33` and replace Buffy's development commit pin before a stable release.
 
 ## Deferred GlassUI integration
 

@@ -1,6 +1,7 @@
 # Deployment is a separate user action. Build and check a package before invoking this.
 param(
-    [string]$AddOnsPath = 'C:\Program Files (x86)\World of Warcraft\_classic_beta_\Interface\AddOns',
+    # The live Forever client. Pass the _classic_beta_ AddOns folder to deploy to the beta client.
+    [string]$AddOnsPath = 'C:\Program Files (x86)\World of Warcraft\_forever_\Interface\AddOns',
     [string]$Library = '', [string]$LibGlass = '',
     [string]$Lua = 'C:\Program Files (x86)\Lua\5.1\lua.exe'
 )

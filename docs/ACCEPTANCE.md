@@ -40,8 +40,8 @@ matching original addon for the main pass.
 
 These changes were tested offline against local LibGroupBuffs commit
 `dcf34b7c7ae8228dbfb6d096e09d0465252f7397` (minor 33). The commit is pinned in
-Buffy for a development package. The commit is published on LibGroupBuffs branch
-`feat/buffy-appearance`, so remote package CI can fetch the pinned SHA.
+Buffy for a development package. It is LibGroupBuffs #70's head, merged into the
+library's `main` as `c7e2137`, so package CI and CurseForge can fetch the pinned SHA.
 Record the client build, Buffy version, vendor and item where relevant, before/after bag
 counts and money, and the result for each check.
 
@@ -66,6 +66,11 @@ counts and money, and the result for each check.
   Arcane Brilliance buys it only while Intellect tracking is enabled.
 - For Druid and Mage purchases, also check the target, limited stock, money, bag space,
   repeated visits, wrong vendors, extended costs, and inventory-based messages.
+- All three classes: restock with a shortfall larger than one stack (e.g. the default
+  target of 80 from an empty bag). Buffy asks for the whole shortfall in one
+  `BuyMerchantItem` call and does not read `GetMerchantItemMaxStack`, while Blizzard's
+  merchant UI never buys more than that limit at once. Record whether one visit buys the
+  full amount, one stack, or nothing.
 
 The owner chose an alpha release before these in-game checks because the beta is closing.
 Buffy may ship `v0.1.1-alpha1` after the companion PRs merge and package CI passes, using
@@ -73,10 +78,11 @@ the published immutable LibGroupBuffs commit pin above. Do not mark these scenar
 verified. When the game is available again, test the exact merged library revision; then
 tag it `r33` and replace Buffy's development commit pin before a stable release.
 
-## Deferred GlassUI integration
+## GlassUI integration
 
-GlassUI PR #160 and its hub roster entry are planned after Buffy v0.1.0. These
-checks do not block this release:
+GlassUI PR #160, the hub roster entry, merged on 2026-10-24 UTC. GlassUI itself is not
+released yet (private repository, no tags), so players get the hub entry only once it ships.
+These checks remain open and do not block a Buffy release:
 
 - Test GlassUI absent, follow on/off, Pearl, clear/smoked/class tint, and gold/ice accent.
   Change each and reload. Confirm the hub shows pending reload and the effective appearance.

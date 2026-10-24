@@ -12,8 +12,8 @@ enable-nolib-creation: no
 # packager's YAML reader keeps it as part of the ref.
 #
 # A pin may be `commit: <full sha>` while Buffy pilots a library release
-# before it is tagged (r26 was, #79); it goes back to a tag before Buffy
-# releases.
+# before it is tagged (minor 33 is, LibGroupBuffs #70, for the v0.1.1
+# alpha); it goes back to a tag before a stable Buffy release.
 externals:
   Libs/LibGlass-1.0:
     url: https://github.com/Spotnick2/LibGlass
@@ -40,7 +40,7 @@ ignore:
   - Media/Logo.png
   # The library's own .pkgmeta ignores its tests and notes, and the BigWigs
   # packager honours that - which is why CI's zip check passes. CurseForge's
-  # packager, which builds the release from the tag webhook, does NOT: the
+  # packager, which builds the release from the tag webhook, does NOT: Priestly's
   # v2.0.6 download carried 46 files under Libs/LibGroupBuffs-1.0 instead of
   # 7, including 824 KB of test fixtures. Nothing there loads, so it was noise
   # rather than breakage, but the paths have to be named from HERE, where that

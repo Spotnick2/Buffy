@@ -39,3 +39,10 @@ roster entry are deferred until after v0.1.0; they are not release prerequisites
 Owner acceptance so far covers general Priest and Mage use and Mark of the Wild
 on Druid. Detailed combat, persistence, and other class scenarios remain in
 [ACCEPTANCE.md](ACCEPTANCE.md).
+
+## Outcome
+
+v0.1.0 is released: the GitHub release (with `Buffy-v0.1.0-forever.zip` and
+`release.json`) on 2026-10-23, and on CurseForge project 1760483. Since then the
+repository has become public and has a CurseForge tag webhook, so later tags are
+built by CurseForge directly; see [RELEASE-v0.1.1-alpha1.md](RELEASE-v0.1.1-alpha1.md).

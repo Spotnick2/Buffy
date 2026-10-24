@@ -4,7 +4,20 @@ The approved working-addon milestone is implemented. The owner reports successfu
 Priest and Mage testing and confirms Mark of the Wild works on Druid;
 see [ACCEPTANCE.md](ACCEPTANCE.md). The approved plan is preserved in [PLAN.md](PLAN.md).
 
-## Repository state
+## Current state (2026-10-24)
+
+- Buffy: PRs #2, #4 and #12 merged to `main`. v0.1.0 is released on GitHub and CurseForge;
+  v0.1.1-alpha1 is prepared ([RELEASE-v0.1.1-alpha1.md](RELEASE-v0.1.1-alpha1.md)) but not tagged.
+- LibGroupBuffs: #69 merged and tagged `r32` (`b51d775`); #70 merged as `c7e2137`. Buffy pins
+  #70's head `dcf34b7` (minor 33), which is reachable from the library's `main`.
+- GlassUI: #160 (Buffy as a dynamic hub member) merged on 2026-10-24 UTC. GlassUI is not
+  released yet (private repository, no tags).
+- `.work/LibGroupBuffs` (at `dcf34b7`) and `.work/LibGlass-r11` are still the pinned checkouts
+  the validation commands use. The other `.work` worktrees and staging folders are history.
+
+The rest of this document records the initial implementation as delivered.
+
+## Repository state at the initial implementation (2026-10-22)
 
 - Buffy: `feat/initial-addon`, initial implementation prepared for PR review.
 - LibGroupBuffs: isolated worktree at `.work/LibGroupBuffs`, branch `feat/buffy-appearance`.

@@ -31,6 +31,12 @@ for line in toc:gmatch("[^\n]+") do
         H.check(not source:find("@project-version@", 1, true), "no substituted version comparison in " .. line)
         H.check(not source:find("SLASH_PRIESTLY",1,true) and not source:find("SLASH_WILDLY",1,true)
             and not source:find("SLASH_MAGELY",1,true), "no original slash registration in " .. line)
+        -- Events go through B.RegisterEvents so the failure reporter is never left out.
+        if line ~= "BuffyCompat.lua" then
+            H.check(not source:find(":Register%a*Event") and not source:find("GB%.RegisterEvents"),
+                "events registered through B.RegisterEvents in " .. line)
+        end
     end
 end
+H.check(H.read("Buffy.lua"):find("B.RegisterEvents(", 1, true), "Buffy.lua registers its events")
 H.done("manifest")

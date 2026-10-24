@@ -30,8 +30,9 @@ Disable the matching original addon when using Buffy to avoid duplicate buff win
 
 ## GlassUI
 
-GlassUI is optional. With the Buffy companion roster entry installed, Buffy appears in its
-hub while loaded and follows its material, body tint/backing, and accent. Change its follow
+GlassUI is optional and not released yet; until it is, Buffy uses its Clean look. Once a
+GlassUI version with the Buffy roster entry is available, Buffy appears in its hub while
+loaded and follows its material, body tint/backing, and accent. Change its follow
 switch or appearance in GlassUI, then `/reload`. Local opacity is disabled while following;
 its saved value returns when following is off. Without a compatible suite, Buffy uses Clean.
 Class/spec icons and buff-status colors retain their meaning.

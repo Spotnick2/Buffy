@@ -189,7 +189,7 @@ Buffy.API = GB.API
 
 -- Event registration, with the failures reported. Buffy code must use this,
 -- never the library's registration directly, so the reporter is never left
--- out. No test enforces it yet: check new code with a grep for RegisterEvent.
+-- out. test_manifest rejects any other registration in the TOC's Lua files.
 function Buffy.RegisterEvents(frame, ...)
     return GB.RegisterEvents(frame, ...)
 end

@@ -54,8 +54,10 @@ v0.1.1 went out as its third alpha. alpha1 and alpha2 publish nowhere else and c
   to both commit-pinned tags and to a redelivery of alpha1, and no file ever appeared, with no
   error. Ruled out before alpha3: the tag type (alpha2), the alpha file type (Priestly's alpha
   built), the token (valid), CurseForge being down (AltStable built meanwhile). LibGroupBuffs
-  tagged `r33` on the same commit, and alpha3 built within minutes. Recorded in
-  `../References/Docs/EMBEDDED-LIBRARIES.md` §3 and `RELEASING.md`.
+  tagged `r33` on the same commit, and alpha3 built within minutes. The shared guides
+  (`../References/Docs/EMBEDDED-LIBRARIES.md` §3 and `RELEASING.md`) still allow a commit pin
+  until [wow-dev-tools #1](https://github.com/Spotnick2/wow-dev-tools/pull/1) merges; follow
+  this section over them.
 - **CurseForge's alpha3 ZIP** (`Buffy-v0.1.1-alpha3.zip`, file 9305968) passes
   `tests/check_package.py`: 47 runtime files, LibGroupBuffs bytes at r33, LibGlass at r11.
 - **Wago** (project QNl4o8Ne) first published through CI with alpha2 (#26).

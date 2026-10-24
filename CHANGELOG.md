@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.1.1-alpha2
+
+- Same addon code as v0.1.1-alpha1, which was published on GitHub only. This build also
+  goes to CurseForge and Wago Addons.
+- Add a battleground option for Priest Shadow Protection.
+- Add up/down window growth and `/buffy test [5|8|off]` to preview group layouts.
+- Add a reagent footer visibility option for each class.
+- Add optional vendor restocking for Priest candles, Druid Gift reagents, and Mage Arcane Powder.
+- This alpha has passed offline tests and package validation; the new behavior still needs in-game checks.
+
 ## v0.1.1-alpha1
 
 - Add a battleground option for Priest Shadow Protection.

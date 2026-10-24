@@ -6,9 +6,9 @@ see [ACCEPTANCE.md](ACCEPTANCE.md). The approved plan is preserved in [PLAN.md](
 
 ## Current state (2026-10-24)
 
-- Buffy: v0.1.0 is released on GitHub and CurseForge. v0.1.1-alpha1 (GitHub only) and
-  v0.1.1-alpha2 (GitHub and Wago) pinned the library by commit; CurseForge built neither.
-  alpha3 pins `tag: r33` ([RELEASE-v0.1.1-alpha1.md](RELEASE-v0.1.1-alpha1.md)).
+- Buffy: v0.1.0 is released on GitHub and CurseForge. v0.1.1-alpha3 (`tag: r33`) is on
+  GitHub, Wago and CurseForge. alpha1 and alpha2 pinned the library by commit, and CurseForge
+  built neither ([RELEASE-v0.1.1-alpha1.md](RELEASE-v0.1.1-alpha1.md), Outcome).
 - LibGroupBuffs: #69 merged and tagged `r32` (`b51d775`); #70 merged as `c7e2137`; its head
   `dcf34b7` (minor 33) tagged `r33` on 2026-10-24.
 - GlassUI: #160 (Buffy as a dynamic hub member) merged on 2026-10-24 UTC. GlassUI is not

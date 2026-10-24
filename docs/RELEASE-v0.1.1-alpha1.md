@@ -39,3 +39,25 @@ Then:
 3. Keep issues #5-#11's in-game acceptance open. After game access returns, test the
    exact merged library revision and Buffy alpha against the checklist. Use those
    results to decide the stable release and LibGroupBuffs `r33` tag.
+
+## Outcome (2026-10-24)
+
+v0.1.1 went out as its third alpha. alpha1 and alpha2 publish nowhere else and can be deleted.
+
+| Tag | Library pin | GitHub | Wago | CurseForge |
+|---|---|---|---|---|
+| v0.1.1-alpha1 (annotated) | `commit: dcf34b7` | prerelease | - (no job yet) | no file |
+| v0.1.1-alpha2 (lightweight) | `commit: dcf34b7` | prerelease | alpha | no file |
+| v0.1.1-alpha3 (lightweight) | `tag: r33` (= dcf34b7) | prerelease | alpha | Alpha, approved |
+
+- **CurseForge builds nothing from a `commit:` pin.** Its webhook answered `{"success":true}`
+  to both commit-pinned tags and to a redelivery of alpha1, and no file ever appeared, with no
+  error. Ruled out before alpha3: the tag type (alpha2), the alpha file type (Priestly's alpha
+  built), the token (valid), CurseForge being down (AltStable built meanwhile). LibGroupBuffs
+  tagged `r33` on the same commit, and alpha3 built within minutes. Recorded in
+  `../References/Docs/EMBEDDED-LIBRARIES.md` §3 and `RELEASING.md`.
+- **CurseForge's alpha3 ZIP** (`Buffy-v0.1.1-alpha3.zip`, file 9305968) passes
+  `tests/check_package.py`: 47 runtime files, LibGroupBuffs bytes at r33, LibGlass at r11.
+- **Wago** (project QNl4o8Ne) first published through CI with alpha2 (#26).
+- In-game acceptance of issues #5-#11 is still open ([ACCEPTANCE.md](ACCEPTANCE.md)); the
+  stable v0.1.1 waits for it.

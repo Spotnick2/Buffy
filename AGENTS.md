@@ -42,8 +42,9 @@ pwsh tests/run.ps1 -Library .work/LibGroupBuffs -LibGlass .work/LibGlass-r11
 pwsh Tools/package.ps1 -Library .work/LibGroupBuffs -LibGlass .work/LibGlass-r11
 ```
 
-The initial companion worktrees are recorded in docs/IMPLEMENTATION.md. Once merged, use
-the sibling checkouts at the declared pins. tests/check_package.py checks a staged directory
+The companion changes are merged (LibGroupBuffs #69 and #70, GlassUI #160). The .work
+worktrees above sit at the declared pins; any checkout at those pins will do, and the runner
+reports whether each library matches its pin. tests/check_package.py checks a staged directory
 or zip, including dependency bytes and licenses. The normal runner syntax-checks the TOC
 and runs every tests/test_*.lua. Extend strict stubs only after checking the current API dump.
 For a library change, run its suite and Priestly/Wildly/Magely against the modified checkout.
@@ -51,15 +52,27 @@ Document baseline failures without changing unrelated repositories.
 
 Use $wow-addon-review for requested WoW code reviews; post completed PR reviews on the PR
 under the standing user authorization. This is implementation guidance, not a review request.
+For a separate architecture or risk consult, the `codex-consult` skill
+(`.claude/skills/codex-consult`) can run Codex headlessly. `$wow-addon-review` remains
+authoritative for the WoW code-review method and verdict.
 
 ## Packaging and release
 
 .pkgmeta embeds LibGlass r11 and an immutable LibGroupBuffs tag or full commit. A local
 development commit must be published to the library repository before remote package CI can
-fetch it. Switch to the released r32-or-newer tag after its in-game acceptance. Never use latest.
+fetch it. v0.1.0 shipped on tag r32; the v0.1.1 alpha pins commit dcf34b7 (minor 33), which goes
+back to a tag (r33) after its in-game acceptance and before a stable release. Never use latest.
 Include dependency licenses. Exclude tests, Tools, docs, .work, and the source PNG from packages.
+
+Releases follow ../References/Docs/RELEASING.md. The repository is public and CurseForge project
+1760483 has a tag webhook: pushing a tag makes CurseForge build its own file from .pkgmeta (the
+tag name decides release/beta/alpha), while the tag's CI run publishes the checked ZIP and
+release.json on GitHub. Check CurseForge's ZIP with tests/check_package.py afterwards; CI proves
+only the BigWigs build. README.curseforge.md is the CurseForge description and stays untracked.
+Wago is not configured.
 
 Remote creation, PRs, release tags, publishing, and game-folder deployment are separate actions.
 Do not deploy just to validate packaging; use a staging folder. Preserve original sibling work.
+Tools/deploy.ps1 targets the live `_forever_` client; pass `-AddOnsPath` for `_classic_beta_`.
 The approved plan is docs/PLAN.md. Finish the current milestone and report tests and remaining
 in-game acceptance before starting another milestone.

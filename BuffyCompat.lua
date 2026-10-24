@@ -25,7 +25,7 @@ Buffy = Buffy or {}
 -- feature check: behaviour changes cannot be feature-detected. r26 is where
 -- lib:New arrived, and r28 where lib:Refusal says why it refused; this file
 -- is written against both. Keep this equal to the MINOR .pkgmeta pins;
--- tests/test_manifest.lua checks that.
+-- tests/test_manifest.lua checks the literal, so update both together.
 local NEEDS_MINOR = 33
 
 -- Buffy's own record of the events this client rejected, for
@@ -113,7 +113,7 @@ end
 
 -- The same three facts, read from the libraries' documented markers in New's
 -- order, for an active copy with no Refusal to ask: an r26 or r27 another
--- addon shipped, active because Buffy's own r28 never registered. Then the
+-- addon shipped, active because Buffy's own copy never registered. Then the
 -- copy running is behind the floor, and that is what the player hears.
 local function WhyRefusedByMarkers()
     local _, active = LibStub:GetLibrary("LibGroupBuffs-1.0", true)
@@ -188,8 +188,8 @@ Buffy.GB = GB
 Buffy.API = GB.API
 
 -- Event registration, with the failures reported. Buffy code must use this,
--- never the library's registration directly (tests/test_bridge.lua enforces
--- it), so the reporter is never left out.
+-- never the library's registration directly, so the reporter is never left
+-- out. No test enforces it yet: check new code with a grep for RegisterEvent.
 function Buffy.RegisterEvents(frame, ...)
     return GB.RegisterEvents(frame, ...)
 end

@@ -29,9 +29,13 @@ local DEFAULTS = {
     showSolo        = false,
     trackPets       = true,
     frameAlpha      = 0.96,
+    growDirection   = "down",
     popoverSide     = "auto",     -- "auto" | "left" | "right"
     lockFrame       = false,
     showClickHints  = true,
+    showReagents    = true,
+    autoBuyGift     = false,
+    giftTarget      = 80,
 }
 DEFAULTS.frameScale = 1
 C.defs, C.defaults = DEFS, DEFAULTS
@@ -171,6 +175,19 @@ end
 
 C.membersFor, C.forgetRoster = MembersFor, ForgetTanks
 C.appearance, C.footerItems, C.refresh = Appearance, FooterItems, RefreshDerived
+C.restock = {
+    enabledKey = "autoBuyGift", targetKey = "giftTarget",
+    label = "Buy Gift of the Wild reagents at vendors", targetLabel = "Gift reagent target",
+    items = function()
+        if not B.IsBuffEnabled("mark") or not MARK.hasGroup then return {} end
+        local itemID = GIFT_REAGENTS[FindGiftRank()]
+        return itemID and { itemID } or {}
+    end,
+    names = { [17021] = "Wild Berries", [17026] = "Wild Thornroot" },
+}
+C.previewFooterItems = function()
+    return { { itemID = 17021, icon = ItemIcon(17021), usedBy = MARK.grp } }
+end
 C.icon = DRUID_ICON
 C.enabledKeys = { mark = "trackMark" }
 C.modeKeys = {}

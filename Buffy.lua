@@ -3,6 +3,8 @@ local B = Buffy
 if not B.API then return end
 local API, GB = B.API, B.GB
 local initialized, loggedIn, warnedNames, warnedRank, auraVisibilityPending
+local pendingRestock = {}
+local ReportRestock
 
 function B.Say(text)
     if DEFAULT_CHAT_FRAME then DEFAULT_CHAT_FRAME:AddMessage("|cff99ddff[Buffy]|r " .. text) end
@@ -34,6 +36,14 @@ end
 function B.OnConfigChanged(key)
     if not B.ui or not loggedIn then return end
     if key == "learnedDurations" or key == "pos" or key == "visible" then return end
+    if B.previewActive then
+        if key == "showSolo" then
+            B.previewSoloToggles = B.previewSoloToggles or {}
+            B.previewSoloToggles[#B.previewSoloToggles + 1] = B.Get("showSolo") == true
+        end
+        if InCombatLockdown() then B.previewRefreshPending = true else B.ui:Update() end
+        return
+    end
     if key == "frameAlpha" or key == "frameScale" then B.ui:ApplyAppearance()
     elseif key == "showSolo" then B.visibility:SoloToggled(B.Get("showSolo"))
     else
@@ -61,12 +71,18 @@ local function Initialize()
     B.ui = GB.UI({
         engine = B.engine, title = "|cff99ddffBuffy|r", version = API.AddonVersion("Buffy"),
         minimizable = true, appearance = B.Appearance, unknownClassIcon = B.class.icon,
-        footerItems = B.class.footerItems, glass = B.Material(),
+        footerItems = function()
+            return B.Get("showReagents") ~= false and B.class.footerItems() or {}
+        end, glass = B.Material(),
+        previewFooterItems = function()
+            return B.Get("showReagents") ~= false and B.class.previewFooterItems() or {}
+        end,
         bodyStyle = B.FollowingSuite() and B.BodyStyle or nil,
         alpha = function() return B.Get("frameAlpha") end,
         scale = function() return B.Get("frameScale") end,
         locked = function() return B.Get("lockFrame") == true end,
         popoverSide = function() return B.Get("popoverSide") end,
+        growDirection = function() return B.Get("growDirection") end,
         showClickHints = function() return B.Get("showClickHints") ~= false end,
         getPos = function() return B.WindowState("pos") end,
         setPos = function(pos) B.SetWindowState("pos", pos) end,
@@ -87,12 +103,87 @@ local function Initialize()
     })
 end
 
+local function EndPreview()
+    if not B.previewActive then return end
+    if InCombatLockdown() then
+        B.previewExitPending = true
+        B.Say("Test mode ends when combat ends.")
+        return
+    end
+    B.previewExitPending = nil
+    B.previewRefreshPending = nil
+    B.previewActive = nil
+    B.ui:SetPreview(nil)
+    B.ui:Close()
+    if B.class.forgetRoster then B.class.forgetRoster() end
+    B.engine:PruneCache()
+    RefreshSpells()
+    for _, enabled in ipairs(B.previewSoloToggles or {}) do B.visibility:SoloToggled(enabled) end
+    B.previewSoloToggles = nil
+    if B.previewJoinedPending then B.visibility:GroupJoined() end
+    B.previewJoinedPending = nil
+    B.visibility:RosterChanged()
+    B.visibility:ContentChanged()
+end
+
+local function StartPreview(groups)
+    if InCombatLockdown() then B.Say("Test mode can only start outside combat."); return end
+    B.previewActive = true
+    B.ui:SetPreview(groups)
+    B.ui:Update()
+    B.Say("Test mode: " .. groups .. " groups. Use /buffy test off to return to live data.")
+end
+
+function B.RestockReagents()
+    local restock = B.class and B.class.restock
+    if not restock or B.Get(restock.enabledKey) ~= true then return end
+    local wanted = {}
+    for _, itemID in ipairs(restock.items()) do wanted[itemID] = true end
+    local target = B.Get(restock.targetKey) or 80
+    local money = API.Money()
+    for index = 1, API.MerchantItemCount() do
+        local itemID, info = API.MerchantItem(index)
+        if itemID and wanted[itemID] and not pendingRestock[itemID] and info and info.isPurchasable
+            and not info.hasExtendedCost and not info.currencyID then
+            local pack = info.stackCount or 1
+            local price = info.price
+            local stock = info.numAvailable
+            if type(pack) == "number" and pack > 0 and type(price) == "number" and price > 0
+                and type(stock) == "number" and (stock == -1 or stock >= pack) then
+                local before = API.CountItem(itemID)
+                local need = target - before
+                local room = API.ItemRoom(itemID)
+                local affordable = math.floor(money / price) * pack
+                local quantity = math.min(need, room, affordable)
+                if stock >= 0 then quantity = math.min(quantity, stock) end
+                quantity = math.floor(quantity / pack) * pack
+                if quantity > 0 and API.BuyMerchantItem(index, quantity) then
+                    wanted[itemID] = nil
+                    pendingRestock[itemID] = before
+                    money = money - (quantity / pack) * price
+                    C_Timer.After(2, function() ReportRestock() end)
+                end
+            end
+        end
+    end
+end
+
+ReportRestock = function()
+    for itemID, before in pairs(pendingRestock) do
+        local gained = API.CountItem(itemID) - before
+        if gained > 0 then
+            B.Say("Bought " .. gained .. " " .. (B.class.restock.names[itemID] or "reagents") .. ".")
+        end
+        pendingRestock[itemID] = nil
+    end
+end
+
 local events = CreateFrame("Frame", "BuffyEvents")
 B.events = events
 B.RegisterEvents(events, "ADDON_LOADED", "PLAYER_LOGIN", "PLAYER_ENTERING_WORLD", "ZONE_CHANGED_NEW_AREA",
     "READY_CHECK", "UNIT_AURA", "UNIT_PET", "RAID_ROSTER_UPDATE", "GROUP_ROSTER_UPDATE", "GROUP_JOINED",
     "PLAYER_TALENT_UPDATE", "ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_REGEN_ENABLED", "BAG_UPDATE",
-    "SPELLS_CHANGED", "PLAYER_ROLES_ASSIGNED", "ROLE_CHANGED_INFORM")
+    "SPELLS_CHANGED", "PLAYER_ROLES_ASSIGNED", "ROLE_CHANGED_INFORM", "MERCHANT_SHOW", "BAG_UPDATE_DELAYED")
 events:SetScript("OnEvent", function(_, event, arg1, arg2)
     if event == "ADDON_LOADED" then
         if arg1 == "Buffy" then Initialize() end
@@ -111,6 +202,13 @@ events:SetScript("OnEvent", function(_, event, arg1, arg2)
         return
     end
     if not loggedIn then return end
+    if event == "MERCHANT_SHOW" then B.RestockReagents(); return end
+    if event == "BAG_UPDATE_DELAYED" then ReportRestock(); return end
+    if B.previewActive and event ~= "PLAYER_REGEN_ENABLED" then
+        if event == "GROUP_JOINED" then B.previewJoinedPending = true end
+        if event == "PLAYER_ENTERING_WORLD" then B.EnteringWorld(arg1, arg2) end
+        return
+    end
     local ui, vis, engine = B.ui, B.visibility, B.engine
     if event == "PLAYER_ENTERING_WORLD" then
         B.EnteringWorld(arg1, arg2)
@@ -141,7 +239,12 @@ events:SetScript("OnEvent", function(_, event, arg1, arg2)
         ui:ApplyAppearance()
         if ui:IsVisible() and InCombatLockdown() then ui:RefreshFooter() else vis:ContentChanged() end
     elseif event == "PLAYER_REGEN_ENABLED" then
+        if B.previewExitPending then EndPreview() end
         ui:OnCombatEnd()
+        if B.previewActive and B.previewRefreshPending then
+            B.previewRefreshPending = nil
+            ui:Update()
+        end
         if auraVisibilityPending then
             auraVisibilityPending = nil
             vis:ContentChanged()
@@ -155,6 +258,17 @@ SlashCmdList.BUFFY = function(message)
     if not loggedIn then B.Say("Buffy is waiting for login to finish."); return end
     local cmd = strtrim(message or ""):lower()
     local ui = B.ui
+    if cmd == "test" or cmd:find("^test%s") then
+        local arg = cmd:match("^test%s*(%S*)")
+        if arg == "off" or (arg == "" and B.previewActive) then EndPreview()
+        elseif arg == "" or arg == "5" or arg == "8" then StartPreview(tonumber(arg) or 5)
+        else B.Say("Use /buffy test [5|8|off].") end
+        return
+    end
+    if B.previewActive then
+        EndPreview()
+        if B.previewActive then return end
+    end
     if cmd == "config" or cmd == "options" or cmd == "settings" then B.OpenConfig()
     elseif cmd == "hide" or cmd == "close" then ui:Close(true)
     elseif cmd == "show" then B.SetWindowState("visible", true); ui:Update()
@@ -167,7 +281,7 @@ SlashCmdList.BUFFY = function(message)
             tostring(pos.x), tostring(pos.y)) or "No saved position.")
         B.Say("Last restore: " .. tostring(ui:RestoreInfo().log) .. "; locked: " .. tostring(B.Get("lockFrame")))
     elseif cmd == "help" then
-        B.Say("/buffy [toggle|show|hide|config|reset|pos|help]")
+        B.Say("/buffy [toggle|show|hide|config|reset|pos|test|help]")
         B.Say("Left-click: group buff when learned, otherwise single. Right-click: single buff. Hover: member list.")
         B.Say("Timer: green >50%, yellow 10-50%, red <10%. ?: unreadable aura or unknown range.")
         local lib, minor = LibStub("LibGroupBuffs-1.0", true)

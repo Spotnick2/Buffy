@@ -39,9 +39,13 @@ local DEFAULTS = {
     showSolo        = false,
     trackPets       = true,
     frameAlpha      = 0.96,
+    growDirection   = "down",
     popoverSide     = "auto",     -- "auto" | "left" | "right"
     lockFrame       = false,
     showClickHints  = true,
+    showReagents    = true,
+    autoBuyPowder   = false,
+    powderTarget    = 80,
 }
 DEFAULTS.frameScale = 1
 C.defs, C.defaults = DEFS, DEFAULTS
@@ -111,6 +115,18 @@ local function FooterItems()
 end
 
 C.appearance, C.footerItems, C.refresh = Appearance, FooterItems, RefreshDerived
+C.restock = {
+    enabledKey = "autoBuyPowder", targetKey = "powderTarget",
+    label = "Buy Arcane Powder at vendors", targetLabel = "Arcane Powder target",
+    items = function()
+        if B.IsBuffEnabled("intellect") and INTELLECT.hasGroup then return { ARCANE_POWDER } end
+        return {}
+    end,
+    names = { [ARCANE_POWDER] = "Arcane Powder" },
+}
+C.previewFooterItems = function()
+    return { { itemID = ARCANE_POWDER, icon = ItemIcon(ARCANE_POWDER), usedBy = INTELLECT.grp } }
+end
 C.icon = MAGE_ICON
 C.enabledKeys = { intellect = "trackIntellect", amplify = "trackAmplify", dampen = "trackDampen" }
 C.modeKeys = { amplify = "amplifyMode", dampen = "dampenMode" }

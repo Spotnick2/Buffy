@@ -149,12 +149,16 @@ local function BuildPanel()
     local y = { v = 0 }
     MakeDesc(content, y, "Buff settings are shared by characters of this class. Window position and visibility belong to this character.")
     for _, opt in ipairs({ { "showSolo", "Show while solo" }, { "trackPets", "Track eligible pets" },
-        { "lockFrame", "Lock frame position" }, { "showClickHints", "Show click hints" } }) do
+        { "lockFrame", "Lock frame position" }, { "showClickHints", "Show click hints" },
+        { "showReagents", "Show reagent footer" } }) do
         local key = opt[1]
         panel.controls[key] = Check(content, y, opt[2], function() return B.Get(key) end,
             function(v) B.SetConfig(key, v) end)
     end
     Choices(content, y, "Popover side", "popoverSide", { { "auto", "Automatic" }, { "left", "Left" }, { "right", "Right" } })
+    Choices(content, y, "Window growth", "growDirection", {
+        { "down", "Down (keep the header in place)" }, { "up", "Up (keep the footer in place)" },
+    })
     local pct = function(v) return string.format("%d%%", math.floor(v * 100 + 0.5)) end
     local opacity = MakeSlider(content, y, { label = "Window opacity", key = "frameAlpha", min = 0, max = 1,
         step = 0.01, default = 0.96, lowText = "0%", highText = "100%", format = pct })
@@ -168,6 +172,16 @@ local function BuildPanel()
     end
     panel.controls.frameScale = MakeSlider(content, y, { label = "Window scale", key = "frameScale",
         min = 0.5, max = 2.5, step = 0.05, default = 1, lowText = "50%", highText = "250%", format = pct })
+    local restock = B.class.restock
+    if restock then
+        panel.controls[restock.enabledKey] = Check(content, y, restock.label,
+            function() return B.Get(restock.enabledKey) == true end,
+            function(v) B.SetConfig(restock.enabledKey, v) end)
+        panel.controls[restock.targetKey] = MakeSlider(content, y, { label = restock.targetLabel,
+            key = restock.targetKey,
+            min = 1, max = 200, step = 1, default = 80, lowText = "1", highText = "200",
+            format = function(v) return tostring(math.floor(v)) end })
+    end
     for _, def in ipairs(B.class.defs) do
         local key = B.class.enabledKeys[def.id]
         if key then
@@ -179,6 +193,11 @@ local function BuildPanel()
             Choices(content, y, def.sngl .. " appears", modeKey, {
                 { "always", "Always" }, { "detect", "When detected on a group member" }, { "instance", "In selected instances" },
             })
+            if B.classToken == "PRIEST" and def.id == "shadow" then
+                panel.controls.shadowInBG = Check(content, y, "Always show Shadow Protection in battlegrounds",
+                    function() return B.Get("shadowInBG") == true end,
+                    function(v) B.SetConfig("shadowInBG", v) end)
+            end
         end
     end
     if B.class.thornsModes then

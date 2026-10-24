@@ -8,6 +8,7 @@
 ## OptionalDeps: GlassUI
 ## IconTexture: Interface\AddOns\Buffy\Media\Logo
 ## X-Curse-Project-ID: 1760483
+## X-Wago-ID: QNl4o8Ne
 
 Libs\LibGlass-1.0\LibGlass-1.0.xml
 Libs\LibGroupBuffs-1.0\LibGroupBuffs-1.0.xml

@@ -67,9 +67,9 @@ Include dependency licenses. Exclude tests, Tools, docs, .work, and the source P
 Releases follow ../References/Docs/RELEASING.md. The repository is public and CurseForge project
 1760483 has a tag webhook: pushing a tag makes CurseForge build its own file from .pkgmeta (the
 tag name decides release/beta/alpha), while the tag's CI run publishes the checked ZIP and
-release.json on GitHub. Check CurseForge's ZIP with tests/check_package.py afterwards; CI proves
+release.json on GitHub and uploads the same ZIP to Wago project QNl4o8Ne
+(https://addons.wago.io/addons/QNl4o8Ne; WAGO_API_TOKEN secret). Check CurseForge's ZIP with tests/check_package.py afterwards; CI proves
 only the BigWigs build. README.curseforge.md is the CurseForge description and stays untracked.
-Wago is not configured.
 
 Remote creation, PRs, release tags, publishing, and game-folder deployment are separate actions.
 Do not deploy just to validate packaging; use a staging folder. Preserve original sibling work.

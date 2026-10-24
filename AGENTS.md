@@ -58,10 +58,10 @@ authoritative for the WoW code-review method and verdict.
 
 ## Packaging and release
 
-.pkgmeta embeds LibGlass r11 and an immutable LibGroupBuffs tag or full commit. A local
-development commit must be published to the library repository before remote package CI can
-fetch it. v0.1.0 shipped on tag r32; the v0.1.1 alpha pins commit dcf34b7 (minor 33), which goes
-back to a tag (r33) after its in-game acceptance and before a stable release. Never use latest.
+.pkgmeta embeds LibGlass r11 and LibGroupBuffs r33 (dcf34b7, minor 33). Pin tags only:
+v0.1.1-alpha1 and -alpha2 pinned the same library commit by `commit:`, and CurseForge's tag
+webhook built no file for either, so a library pilot gets a tag first. v0.1.0 shipped on r32.
+Never use latest.
 Include dependency licenses. Exclude tests, Tools, docs, .work, and the source PNG from packages.
 
 Releases follow ../References/Docs/RELEASING.md. The repository is public and CurseForge project

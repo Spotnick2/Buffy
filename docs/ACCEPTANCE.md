@@ -39,9 +39,9 @@ matching original addon for the main pass.
 ## Pending checks for Buffy issues #5-#11
 
 These changes were tested offline against local LibGroupBuffs commit
-`dcf34b7c7ae8228dbfb6d096e09d0465252f7397` (minor 33). The commit is pinned in
-Buffy for a development package. It is LibGroupBuffs #70's head, merged into the
-library's `main` as `c7e2137`, so package CI and CurseForge can fetch the pinned SHA.
+`dcf34b7c7ae8228dbfb6d096e09d0465252f7397` (minor 33), LibGroupBuffs #70's head,
+merged into the library's `main` as `c7e2137` and tagged `r33` on 2026-10-24.
+v0.1.1-alpha1 and -alpha2 pinned the commit; from alpha3 Buffy pins `tag: r33`.
 Record the client build, Buffy version, vendor and item where relevant, before/after bag
 counts and money, and the result for each check.
 
@@ -73,10 +73,9 @@ counts and money, and the result for each check.
   full amount, one stack, or nothing.
 
 The owner chose an alpha release before these in-game checks because the beta is closing.
-Buffy may ship `v0.1.1-alpha1` after the companion PRs merge and package CI passes, using
-the published immutable LibGroupBuffs commit pin above. Do not mark these scenarios as
-verified. When the game is available again, test the exact merged library revision; then
-tag it `r33` and replace Buffy's development commit pin before a stable release.
+The v0.1.1 alphas ship that library revision without these checks. Do not mark these
+scenarios as verified. `r33` was tagged before them to fix CurseForge packaging; the stable
+v0.1.1 still waits for this checklist, run against r33.
 
 ## GlassUI integration
 

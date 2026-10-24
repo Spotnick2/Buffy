@@ -6,10 +6,11 @@ see [ACCEPTANCE.md](ACCEPTANCE.md). The approved plan is preserved in [PLAN.md](
 
 ## Current state (2026-10-24)
 
-- Buffy: PRs #2, #4 and #12 merged to `main`. v0.1.0 is released on GitHub and CurseForge;
-  v0.1.1-alpha1 is prepared ([RELEASE-v0.1.1-alpha1.md](RELEASE-v0.1.1-alpha1.md)) but not tagged.
-- LibGroupBuffs: #69 merged and tagged `r32` (`b51d775`); #70 merged as `c7e2137`. Buffy pins
-  #70's head `dcf34b7` (minor 33), which is reachable from the library's `main`.
+- Buffy: v0.1.0 is released on GitHub and CurseForge. v0.1.1-alpha1 (GitHub only) and
+  v0.1.1-alpha2 (GitHub and Wago) pinned the library by commit; CurseForge built neither.
+  alpha3 pins `tag: r33` ([RELEASE-v0.1.1-alpha1.md](RELEASE-v0.1.1-alpha1.md)).
+- LibGroupBuffs: #69 merged and tagged `r32` (`b51d775`); #70 merged as `c7e2137`; its head
+  `dcf34b7` (minor 33) tagged `r33` on 2026-10-24.
 - GlassUI: #160 (Buffy as a dynamic hub member) merged on 2026-10-24 UTC. GlassUI is not
   released yet (private repository, no tags).
 - `.work/LibGroupBuffs` (at `dcf34b7`) and `.work/LibGlass-r11` are still the pinned checkouts

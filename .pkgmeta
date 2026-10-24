@@ -11,16 +11,16 @@ enable-nolib-creation: no
 # it against the TOC; no comment may sit on a value line, because the
 # packager's YAML reader keeps it as part of the ref.
 #
-# A pin may be `commit: <full sha>` while Buffy pilots a library release
-# before it is tagged (minor 33 is, LibGroupBuffs #70, for the v0.1.1
-# alpha); it goes back to a tag before a stable Buffy release.
+# Pin tags only. v0.1.1-alpha1 and -alpha2 pinned LibGroupBuffs by
+# `commit:`; GitHub CI built both, but CurseForge's tag webhook accepted
+# each push and built no file. A library pilot gets a tag first.
 externals:
   Libs/LibGlass-1.0:
     url: https://github.com/Spotnick2/LibGlass
     tag: r11
   Libs/LibGroupBuffs-1.0:
     url: https://github.com/Spotnick2/LibGroupBuffs
-    commit: dcf34b7c7ae8228dbfb6d096e09d0465252f7397
+    tag: r33
 
 manual-changelog:
   filename: CHANGELOG.md

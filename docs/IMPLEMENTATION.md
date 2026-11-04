@@ -11,6 +11,10 @@ see [ACCEPTANCE.md](ACCEPTANCE.md). The approved plan is preserved in [PLAN.md](
   built neither ([RELEASE-v0.1.1-alpha1.md](RELEASE-v0.1.1-alpha1.md), Outcome).
   v1.0.0-beta1 ships alpha3's code and pins (LibGroupBuffs r33, LibGlass r11) as a beta;
   the stable v1.0.0 waits for the in-game checklist in [ACCEPTANCE.md](ACCEPTANCE.md).
+  beta1 (annotated tag on `69d2b14`, 2026-11-03) is a GitHub pre-release with `release.json`,
+  uploaded to Wago by CI, and built by CurseForge from the tag webhook. CurseForge's ZIP
+  (`Buffy-v1.0.0-beta1.zip`) passes `tests/check_package.py` (47 runtime files, library bytes
+  at r33 and r11) and matches the GitHub ZIP file for file, SHA-256 with CRs stripped.
   LibGroupBuffs r34 (#31) is not tagged yet and is not part of this beta.
 - LibGroupBuffs: #69 merged and tagged `r32` (`b51d775`); #70 merged as `c7e2137`; its head
   `dcf34b7` (minor 33) tagged `r33` on 2026-10-24.

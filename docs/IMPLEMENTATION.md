@@ -4,11 +4,14 @@ The approved working-addon milestone is implemented. The owner reports successfu
 Priest and Mage testing and confirms Mark of the Wild works on Druid;
 see [ACCEPTANCE.md](ACCEPTANCE.md). The approved plan is preserved in [PLAN.md](PLAN.md).
 
-## Current state (2026-10-24)
+## Current state (2026-11-03)
 
 - Buffy: v0.1.0 is released on GitHub and CurseForge. v0.1.1-alpha3 (`tag: r33`) is on
   GitHub, Wago and CurseForge. alpha1 and alpha2 pinned the library by commit, and CurseForge
   built neither ([RELEASE-v0.1.1-alpha1.md](RELEASE-v0.1.1-alpha1.md), Outcome).
+  v1.0.0-beta1 ships alpha3's code and pins (LibGroupBuffs r33, LibGlass r11) as a beta;
+  the stable v1.0.0 waits for the in-game checklist in [ACCEPTANCE.md](ACCEPTANCE.md).
+  LibGroupBuffs r34 (#31) is not tagged yet and is not part of this beta.
 - LibGroupBuffs: #69 merged and tagged `r32` (`b51d775`); #70 merged as `c7e2137`; its head
   `dcf34b7` (minor 33) tagged `r33` on 2026-10-24.
 - GlassUI: #160 (Buffy as a dynamic hub member) merged on 2026-10-24 UTC. GlassUI is not

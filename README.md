@@ -22,7 +22,8 @@ combat ends. Unsupported classes create no buff window.
 ## Commands and settings
 
 `/buffy` toggles the window. Available commands: `show`, `hide`, `config`, `reset`, `pos`,
-`test`, `help`, and `toggle`. Help includes localized spell names and dependency diagnostics.
+`test`, `help`, and `toggle`. Help includes localized spell names and dependency diagnostics, and flags any spell name
+Buffy could not read from your client. Please include those lines when reporting a problem.
 
 `/buffy test 5` or `/buffy test 8` previews the window with five or eight full groups, so you
 can place and size it before a raid. Clicks never cast in the preview. `/buffy test off`, or any
@@ -50,7 +51,11 @@ Disable the matching original addon when using Buffy to avoid duplicate buff win
 - The features added in 1.0 (battleground Shadow Protection, window growth, the preview, the
   footer option and vendor restocking) have passed offline tests but are still being checked on
   the live client. Please report anything that misbehaves.
-- A `?` on a member means Buffy can't read that aura right now or the member is out of range.
+- A `?` beside a member's class icon means the spell's range is unknown. A `?` instead of a
+  timer means Buffy can't read that aura right now and has no earlier reading to count down from.
+- Hunter and warlock pets don't count for Fortitude, Mark of the Wild or Arcane Intellect, and
+  aren't offered as their targets: Forever doesn't allow those buffs on them. Druid Thorns in
+  *Everyone* mode includes pets when *Track eligible pets* is on.
 
 ## GlassUI
 

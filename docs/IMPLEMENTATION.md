@@ -4,24 +4,31 @@ The approved working-addon milestone is implemented. The owner reports successfu
 Priest and Mage testing and confirms Mark of the Wild works on Druid;
 see [ACCEPTANCE.md](ACCEPTANCE.md). The approved plan is preserved in [PLAN.md](PLAN.md).
 
-## Current state (2026-11-03)
+## Current state (2026-11-04)
 
 - Buffy: v0.1.0 is released on GitHub and CurseForge. v0.1.1-alpha3 (`tag: r33`) is on
   GitHub, Wago and CurseForge. alpha1 and alpha2 pinned the library by commit, and CurseForge
   built neither ([RELEASE-v0.1.1-alpha1.md](RELEASE-v0.1.1-alpha1.md), Outcome).
   v1.0.0-beta1 ships alpha3's code and pins (LibGroupBuffs r33, LibGlass r11) as a beta;
-  the stable v1.0.0 waits for the in-game checklist in [ACCEPTANCE.md](ACCEPTANCE.md).
+  the stable v1.0.0 was then planned to wait for the in-game checklist in
+  [ACCEPTANCE.md](ACCEPTANCE.md).
   beta1 (annotated tag on `69d2b14`, 2026-11-03) is a GitHub pre-release with `release.json`,
   uploaded to Wago by CI, and built by CurseForge from the tag webhook. CurseForge's ZIP
   (`Buffy-v1.0.0-beta1.zip`) passes `tests/check_package.py` (47 runtime files, library bytes
   at r33 and r11) and matches the GitHub ZIP file for file, SHA-256 with CRs stripped.
-  LibGroupBuffs r34 (#31) is not tagged yet and is not part of this beta.
+  LibGroupBuffs r34 (#31) was not tagged yet and is not part of this beta.
+- v1.0.0 (2026-11-04): beta1's addon code on LibGroupBuffs `tag: r34` (`1ede1c1`, minor 34,
+  Buffy #36) and LibGlass r11. The owner chose to ship it before the in-game checklist, which
+  now runs after the release with the r34 check (#35). Offline suite and staged package
+  (47 runtime files) pass against an export of r34.
 - LibGroupBuffs: #69 merged and tagged `r32` (`b51d775`); #70 merged as `c7e2137`; its head
-  `dcf34b7` (minor 33) tagged `r33` on 2026-10-24.
+  `dcf34b7` (minor 33) tagged `r33` on 2026-10-24; `1ede1c1` (minor 34) tagged `r34` on
+  2026-11-04, before its in-game check.
 - GlassUI: #160 (Buffy as a dynamic hub member) merged on 2026-10-24 UTC. GlassUI is not
   released yet (private repository, no tags).
-- `.work/LibGroupBuffs` (at `dcf34b7`) and `.work/LibGlass-r11` are still the pinned checkouts
-  the validation commands use. The other `.work` worktrees and staging folders are history.
+- `.work/LibGroupBuffs` is still at `dcf34b7` (r33), so it no longer matches the pin; v1.0.0
+  was validated against `.work/LibGroupBuffs-r34`, a `git archive` export of r34.
+  `.work/LibGlass-r11` matches its pin. The other `.work` worktrees and staging folders are history.
 
 The rest of this document records the initial implementation as delivered.
 

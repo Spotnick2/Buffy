@@ -77,8 +77,13 @@ The v0.1.1 alphas ship that library revision without these checks. Do not mark t
 scenarios as verified. `r33` was tagged before them to fix CurseForge packaging.
 
 On 2026-11-03, the day before game access returns, the owner chose to ship the same code and
-pins as v1.0.0-beta1, still without these checks. The stable v1.0.0 (formerly the planned
-v0.1.1) waits for this checklist, run against the library pin it ships with.
+pins as v1.0.0-beta1, still without these checks. The plan then was for the stable v1.0.0
+(formerly the planned v0.1.1) to wait for this checklist, run against the library pin it ships with.
+
+On 2026-11-04, the day game access returned, the owner chose to ship the stable v1.0.0 before
+these checks, on LibGroupBuffs `tag: r34` (`1ede1c1`, minor 34) and LibGlass r11. They now
+run after the release, against r34, together with the r34 check in Buffy #35. Do not mark them
+verified until they are run.
 
 ## GlassUI integration
 

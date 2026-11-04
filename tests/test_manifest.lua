@@ -14,7 +14,7 @@ local external = assert(P.externals())
 H.eq(external["Libs/LibGlass-1.0"].ref, "r11", "glass immutable release pin")
 local pin = external["Libs/LibGroupBuffs-1.0"]
 H.eq(pin.kind, "tag", "library pinned to a release tag")
-H.eq(pin.ref, "r33", "library pinned to tested source (r33 = dcf34b7)")
+H.eq(pin.ref, "r34", "library pinned to tested source (r34 = 1ede1c1)")
 H.check(H.read("BuffyCompat.lua"):find("NEEDS_MINOR = 33", 1, true), "growth and preview API floor")
 local logo = assert(io.open("Media/Logo.tga", "rb"))
 local header = logo:read(18); logo:close()
@@ -23,7 +23,8 @@ H.eq(header:byte(13) + header:byte(14)*256, 256, "power-of-two width")
 H.eq(header:byte(15) + header:byte(16)*256, 256, "power-of-two height")
 H.eq(header:byte(17), 32, "32-bit texture")
 local pkg = H.read(".pkgmeta")
-for _, path in ipairs({ "tests", "Tools", "docs", "Media/Logo.png", "Libs/LibGroupBuffs-1.0/Tools" }) do
+for _, path in ipairs({ "tests", "Tools", "docs", "Media/Logo.png", "Libs/LibGroupBuffs-1.0/Tools",
+    "Libs/LibGroupBuffs-1.0/docs" }) do
     H.check(pkg:find("  - " .. path .. "\n", 1, true), "package excludes " .. path)
 end
 for line in toc:gmatch("[^\n]+") do

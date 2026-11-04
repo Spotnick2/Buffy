@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.0.0 - 2026-11-04
+
+- First stable release of Buffy 1.0. Same addon code as v1.0.0-beta1, now built on
+  LibGroupBuffs r34 (beta1 used r33) and LibGlass r11.
+- Changes since v0.1.0:
+  - Add a battleground option for Priest Shadow Protection.
+  - Add up/down window growth and `/buffy test [5|8|off]` to preview group layouts.
+  - Add a reagent footer visibility option for each class.
+  - Add optional vendor restocking for Priest candles, Druid Gift reagents, and Mage Arcane
+    Powder. It is off by default.
+- These changes have passed offline tests and package validation. Their in-game checks on the
+  live client follow this release.
+
 ## v1.0.0-beta1
 
 - First beta of Buffy 1.0. Same addon code and libraries as v0.1.1-alpha3 (LibGroupBuffs r33,

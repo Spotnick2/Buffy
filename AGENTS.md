@@ -5,7 +5,7 @@ Author: Spotnick. CurseForge project: 1760483. Lua 5.1 only; Vanilla content on 
 
 ## Architecture
 
-- BuffyCompat.lua is the only library bootstrap and reporter. It requires LibGroupBuffs r32.
+- BuffyCompat.lua is the only library bootstrap and reporter. It requires LibGroupBuffs minor 33 (`NEEDS_MINOR`).
 - Classes/Priest.lua, Druid.lua, Mage.lua contain definitions, defaults, instance data,
   targeting rules, spec appearance, and reagent data adapted from the original addons.
 - Buffy.lua selects one class at ADDON_LOADED, creates exactly one engine/UI/visibility
@@ -58,9 +58,10 @@ authoritative for the WoW code-review method and verdict.
 
 ## Packaging and release
 
-.pkgmeta embeds LibGlass r11 and LibGroupBuffs r33 (dcf34b7, minor 33). Pin tags only:
+.pkgmeta embeds LibGlass r11 and LibGroupBuffs r34 (1ede1c1, minor 34). Pin tags only:
 v0.1.1-alpha1 and -alpha2 pinned the same library commit by `commit:`, and CurseForge's tag
-webhook built no file for either, so a library pilot gets a tag first. v0.1.0 shipped on r32.
+webhook built no file for either, so a library pilot gets a tag first. v0.1.0 shipped on r32,
+v1.0.0-beta1 on r33, v1.0.0 on r34.
 Never use latest.
 Include dependency licenses. Exclude tests, Tools, docs, .work, and the source PNG from packages.
 
@@ -70,6 +71,9 @@ tag name decides release/beta/alpha), while the tag's CI run publishes the check
 release.json on GitHub and uploads the same ZIP to Wago project QNl4o8Ne
 (https://addons.wago.io/addons/QNl4o8Ne; WAGO_API_TOKEN secret). Check CurseForge's ZIP with tests/check_package.py afterwards; CI proves
 only the BigWigs build. README.curseforge.md is the CurseForge description and stays untracked.
+A release tag (`vX.Y.Z`, not an alpha or beta) updates README.md and README.curseforge.md in
+its prep PR so both describe that release (RELEASING.md §3); the PR says whether
+README.curseforge.md changed, since the owner pastes it into CurseForge and Wago afterwards.
 
 Remote creation, PRs, release tags, publishing, and game-folder deployment are separate actions.
 Do not deploy just to validate packaging; use a staging folder. Preserve original sibling work.

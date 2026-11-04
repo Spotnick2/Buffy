@@ -74,8 +74,11 @@ counts and money, and the result for each check.
 
 The owner chose an alpha release before these in-game checks because the beta is closing.
 The v0.1.1 alphas ship that library revision without these checks. Do not mark these
-scenarios as verified. `r33` was tagged before them to fix CurseForge packaging; the stable
-v0.1.1 still waits for this checklist, run against r33.
+scenarios as verified. `r33` was tagged before them to fix CurseForge packaging.
+
+On 2026-11-03, the day before game access returns, the owner chose to ship the same code and
+pins as v1.0.0-beta1, still without these checks. The stable v1.0.0 (formerly the planned
+v0.1.1) waits for this checklist, run against the library pin it ships with.
 
 ## GlassUI integration
 

@@ -114,6 +114,21 @@ local function FooterItems()
     return items
 end
 
+-- Forever refuses stat buffs on hunter and warlock pets (forever-bugs #27,
+-- closed as intended), so Intellect and Brilliance neither count nor target
+-- them. Amplify, Dampen and other pet types are unchanged (Magely #54).
+local function EligibleMembers(def, members)
+    if def.id ~= "intellect" then return members end
+    local out = {}
+    for _, m in ipairs(members) do
+        if m.class ~= "PET_HUNTER" and m.class ~= "PET_WARLOCK" then
+            out[#out + 1] = m
+        end
+    end
+    return out
+end
+
+C.membersFor = EligibleMembers
 C.appearance, C.footerItems, C.refresh = Appearance, FooterItems, RefreshDerived
 C.restock = {
     enabledKey = "autoBuyPowder", targetKey = "powderTarget",

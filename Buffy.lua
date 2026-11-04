@@ -283,7 +283,8 @@ SlashCmdList.BUFFY = function(message)
     elseif cmd == "help" then
         B.Say("/buffy [toggle|show|hide|config|reset|pos|test|help]")
         B.Say("Left-click: group buff when learned, otherwise single. Right-click: single buff. Hover: member list.")
-        B.Say("Timer: green >50%, yellow 10-50%, red <10%. ?: unreadable aura or unknown range.")
+        B.Say("Timer: green >50%, yellow 10-50%, red <10%.")
+        B.Say("? beside the class icon: spell range unknown. ? instead of a timer: buff state unreadable, with no cached reading.")
         local lib, minor = LibStub("LibGroupBuffs-1.0", true)
         local report = B.engine:SpellReport()
         B.Say("Locale " .. tostring(report.locale) .. ", build " .. tostring(API.ClientBuild())
@@ -297,6 +298,17 @@ SlashCmdList.BUFFY = function(message)
         end
         for _, rank in ipairs(report.ranks or {}) do
             B.Say("Unreadable rank: " .. tostring(rank.name) .. " / " .. tostring(rank.subtext))
+        end
+        -- Counted, as Priestly, Wildly and Magely do, so a fallback name is
+        -- said in one line rather than left to be spotted in the list (r34
+        -- counts names built by an older library copy apart).
+        if (report.unresolved or 0) > 0 then
+            B.Say(report.unresolved .. " name(s) could not be read from the client (fallback). Buffs Buffy "
+                .. "cannot name are read as missing on everyone. Please report this with the lines above.")
+        end
+        if (report.unknown or 0) > 0 then
+            B.Say(report.unknown .. " name(s) of unknown origin (built by an older copy of the library, "
+                .. "so English or this client's).")
         end
     elseif cmd == "" or cmd == "toggle" then
         if ui:IsVisible() then ui:Close(true) else B.SetWindowState("visible", true); ui:Update() end

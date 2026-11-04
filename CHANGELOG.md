@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.0.1 - 2026-11-04
 
 - Druid: hunter and warlock pets no longer count as missing Mark of the Wild or appear as its
   targets. Forever does not allow that buff on them. Other pet types are unchanged.
@@ -10,6 +10,8 @@
   targets. Amplify and Dampen Magic are unchanged.
 - `/buffy help` explains the two `?` marks separately (spell range unknown, or buff state
   unreadable), and counts any spell name it could not read from the client.
+- Same libraries as v1.0.0: LibGroupBuffs r34 and LibGlass r11. These changes have passed
+  offline tests; their in-game checks follow this release.
 
 ## v1.0.0 - 2026-11-04
 

@@ -26,7 +26,8 @@ matching original addon for the main pass.
 - Solo toggle, group join/leave, ready check, manual hide, reload, and learning a new spell
   should preserve visibility policy. Verify single-target fallback before learning group spells.
 - Left/right clicks on rows and member popovers should cast the intended spells on eligible
-  targets. Verify pet exclusion for Fortitude, all five Thorns modes, role changes, and Mage
+  targets. Verify hunter/warlock pet exclusion for Fortitude, Mark of the Wild and Arcane
+  Intellect, all five Thorns modes (Everyone includes tracked pets), role changes, and Mage
   Amplify/Dampen detection independently. Verify instance selections and a non-English locale.
 - During combat, request show/hide, resize, reset, and minimize/restore. Confirm no blocked
   action/taint errors and that deferred changes apply when combat ends. Check aura unknown states.

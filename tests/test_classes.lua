@@ -6,7 +6,17 @@ WoW.SetUnit("party1", { class = "WARRIOR", role = "TANK" })
 WoW.groupMembers = 2
 local def = B.class.defs[2]
 B.SetConfig("thornsMode", "everyone")
-H.eq(#B.engine:MembersFor(def, members), 2, "thorns excludes pets")
+H.eq(#B.engine:MembersFor(def, members), 3, "everyone thorns includes tracked pets")
+B.SetConfig("trackPets", false)
+H.eq(#B.engine:MembersFor(def, members), 2, "everyone thorns leaves pets out when pets are not tracked")
+B.SetConfig("trackPets", true)
+-- Mark/Gift: Forever refuses stat buffs on hunter and warlock pets; other pets keep it.
+local mark = B.class.defs[1]
+local petMix = { { unit = "player", class = "DRUID" }, { unit = "partypet1", class = "PET_HUNTER" },
+    { unit = "partypet2", class = "PET_WARLOCK" }, { unit = "partypet3", class = "PET" } }
+local markFor = B.engine:MembersFor(mark, petMix)
+H.eq(#markFor, 2, "mark excludes hunter and warlock pets")
+H.eq(markFor[2] and markFor[2].class, "PET", "mark keeps other pet types")
 B.SetConfig("thornsMode", "self")
 H.eq(B.engine:MembersFor(def, members)[1].unit, "player", "self targeting")
 B.SetConfig("thornsMode", "tanks")
@@ -19,6 +29,20 @@ WoW.dispatch("PLAYER_ROLES_ASSIGNED")
 H.eq(B.class.effectiveMode(), "self", "role change invalidates tank cache")
 B.SetConfig("thornsMode", "disabled")
 H.eq(B.IsBuffEnabled("thorns"), false, "disabled thorns")
+
+B.SetConfig("thornsMode", "self")
+H.eq(#B.engine:MembersFor(def, members), 1, "self thorns never covers pets")
+B.SetConfig("thornsMode", "tanks")
+WoW.units.party1.role = "TANK"
+WoW.dispatch("PLAYER_ROLES_ASSIGNED")
+H.eq(#B.engine:MembersFor(def, members), 1, "tank thorns never covers pets")
+
+B = H.load("MAGE")
+local intellect, amplify = B.class.defs[1], B.class.defs[2]
+local intFor = B.engine:MembersFor(intellect, petMix)
+H.eq(#intFor, 2, "intellect excludes hunter and warlock pets")
+H.eq(intFor[2] and intFor[2].class, "PET", "intellect keeps other pet types")
+H.eq(#B.engine:MembersFor(amplify, petMix), 4, "amplify keeps every pet")
 
 B = H.load("PRIEST")
 local fort = B.class.defs[1]

@@ -58,7 +58,22 @@ for _, class in ipairs({ "PRIEST", "DRUID", "MAGE", "WARRIOR" }) do
         H.check(B.optionsPanel.controls.showReagents ~= nil, "footer control on every class")
         H.check(B.optionsPanel.controls[B.class.restock.enabledKey] ~= nil, "restock control on every class")
         H.check(B.optionsPanel.controls[B.class.restock.targetKey] ~= nil, "restock target on every class")
+        WoW.messages = {}
         SlashCmdList.BUFFY("help")
+        local help = table.concat(WoW.messages, " | ")
+        H.check(help:find("? beside the class icon: spell range unknown", 1, true) ~= nil, "help names the range ?")
+        H.check(help:find("? instead of a timer: buff state unreadable", 1, true) ~= nil, "help names the aura ?")
+        H.check(help:find("could not be read", 1, true) == nil, "no unresolved count on a healthy client")
+        H.check(help:find("unknown origin", 1, true) == nil, "no unknown-origin count on a healthy client")
+        local first = B.class.defs[1]
+        local single, group = first.snglFrom, first.grpFrom
+        first.snglFrom, first.grpFrom = "fallback", "unknown"
+        WoW.messages = {}
+        SlashCmdList.BUFFY("help")
+        help = table.concat(WoW.messages, " | ")
+        H.check(help:find("1 name(s) could not be read from the client", 1, true) ~= nil, "unresolved names are counted")
+        H.check(help:find("1 name(s) of unknown origin", 1, true) ~= nil, "unknown-origin names are counted apart")
+        first.snglFrom, first.grpFrom = single, group
         SlashCmdList.BUFFY("pos")
         WoW.inCombat = true
         B.SetConfig("showReagents", false)

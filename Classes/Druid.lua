@@ -89,11 +89,13 @@ local function ThornsMembers(members)
     local mode = EffectiveMode()
     local out = {}
     for _, m in ipairs(members) do
-        if not IsPet(m) then
+        -- Everyone includes tracked pets (Wildly #41): Forever lets Thorns
+        -- land on them. Self and tanks stay players only.
+        if mode == "everyone" and (not IsPet(m) or B.Get("trackPets") ~= false) then
+            out[#out + 1] = m
+        elseif not IsPet(m) then
             local include
-            if mode == "everyone" then
-                include = true
-            elseif mode == "self" then
+            if mode == "self" then
                 include = UnitIsUnit(m.unit, "player")
             else -- "tanks"
                 include = IsTank(m.unit)
@@ -104,9 +106,19 @@ local function ThornsMembers(members)
     return out
 end
 
+-- Forever refuses stat buffs on hunter and warlock pets (forever-bugs #27,
+-- closed as intended), so Mark and Gift neither count nor target them.
+-- Other pet types keep their eligibility until it is measured (Wildly #47).
 local function MembersFor(def, members)
-    if def.id ~= "thorns" then return members end
-    return ThornsMembers(members)
+    if def.id == "thorns" then return ThornsMembers(members) end
+    if def.id ~= "mark" then return members end
+    local out = {}
+    for _, m in ipairs(members) do
+        if m.class ~= "PET_HUNTER" and m.class ~= "PET_WARLOCK" then
+            out[#out + 1] = m
+        end
+    end
+    return out
 end
 
 local SPEC_ICON_SPELLS = {

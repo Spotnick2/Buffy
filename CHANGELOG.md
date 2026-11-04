@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- Druid: hunter and warlock pets no longer count as missing Mark of the Wild or appear as its
+  targets. Forever does not allow that buff on them. Other pet types are unchanged.
+- Druid: Thorns in Everyone mode now includes pets when Track eligible pets is on. Self and tank
+  modes are unchanged.
+- Mage: hunter and warlock pets no longer count as missing Arcane Intellect or appear as its
+  targets. Amplify and Dampen Magic are unchanged.
+- `/buffy help` explains the two `?` marks separately (spell range unknown, or buff state
+  unreadable), and counts any spell name it could not read from the client.
+
 ## v1.0.0 - 2026-11-04
 
 - First stable release of Buffy 1.0. Same addon code as v1.0.0-beta1, now built on

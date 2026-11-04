@@ -204,7 +204,7 @@ local function BuildPanel()
         Choices(content, y, "Thorns targets", "thornsMode", {
             { "default", "Automatic: tanks when assigned, otherwise yourself" },
             { "tanks", "Tanks only" }, { "self", "Yourself" },
-            { "everyone", "Everyone (excluding pets)" }, { "disabled", "Disabled" },
+            { "everyone", "Everyone (pets if Track eligible pets is on)" }, { "disabled", "Disabled" },
         })
     end
     for _, def in ipairs(B.class.defs) do

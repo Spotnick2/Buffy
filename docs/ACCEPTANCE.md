@@ -86,6 +86,9 @@ these checks, on LibGroupBuffs `tag: r34` (`1ede1c1`, minor 34) and LibGlass r11
 run after the release, against r34, together with the r34 check in Buffy #35. Do not mark them
 verified until they are run.
 
+On 2026-11-18, after v1.0.1, main moved to LibGlass r13 (`5b2c9ab`). The checks that run from
+then on run against r34 and r13, which is what the next release ships.
+
 ## GlassUI integration
 
 GlassUI PR #160, the hub roster entry, merged on 2026-10-24 UTC. GlassUI itself is not

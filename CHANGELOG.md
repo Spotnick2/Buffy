@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- LibGlass r13 (was r11). Buffy's window draws its glass with it. Nothing is meant to look
+  different. LibGroupBuffs stays at r34.
+
 ## v1.0.1 - 2026-11-04
 
 - Druid: hunter and warlock pets no longer count as missing Mark of the Wild or appear as its

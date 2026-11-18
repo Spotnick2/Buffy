@@ -25,6 +25,10 @@ see [ACCEPTANCE.md](ACCEPTANCE.md). The approved plan is preserved in [PLAN.md](
   fonts follow the client locale, and r13 adds `Glass.Button`, which Buffy does not use, plus 7 textures.
   The offline suite passes on r11, r12 and r13 alike, and the staged package grows to 54 runtime
   files. The next release ships r13. The window is checked in game on r13 with #35.
+- Then (2026-11-18): main pins LibGroupBuffs `tag: r36` (`5bae625`, minor 36). r35 changes only
+  MINOR at runtime (its tests moved onto WowTestKit); r36 draws the window's text in LibGlass's
+  `FONTS.arial.file`, the client language's font since LibGlass r12. Its in-game check is #46. The
+  offline suite passes against an export of r36 (`.work/LibGroupBuffs-r36`). `NEEDS_MINOR` stays 33.
 - LibGroupBuffs: #69 merged and tagged `r32` (`b51d775`); #70 merged as `c7e2137`; its head
   `dcf34b7` (minor 33) tagged `r33` on 2026-10-24; `1ede1c1` (minor 34) tagged `r34` on
   2026-11-04, before its in-game check.

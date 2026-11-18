@@ -3,7 +3,10 @@
 ## Unreleased
 
 - LibGlass r13 (was r11). Buffy's window draws its glass with it. Nothing is meant to look
-  different. LibGroupBuffs stays at r34.
+  different.
+- LibGroupBuffs r36 (was r34). The window's text uses the font LibGlass picks for the client's
+  language, so Korean and Chinese clients should get letters instead of boxes (not yet checked on
+  those clients). English and Russian clients keep the same font.
 
 ## v1.0.1 - 2026-11-04
 

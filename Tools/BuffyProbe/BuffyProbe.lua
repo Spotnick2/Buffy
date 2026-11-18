@@ -190,11 +190,22 @@ local function spellName(id)
     return ok and n or nil
 end
 
+-- t[k] for a plain table t, else nil. The value may be secret: it is returned as is and never
+-- truth-tested here. A truth test (`x and t.k or nil`) on a secret throws on the client, and Lua
+-- 5.1 test doubles can't show it (porting guide), so every caller asks isSecret first (Codex, #53).
+local function field(t, k)
+    if type(t) ~= "table" or isSecret(t) then return nil end
+    return t[k]
+end
+
 -- The id the client gives for a spell name (C_Spell.GetSpellInfo takes a name too).
 local function idForName(name)
     local S = rawget(_G, "C_Spell")
     local ok, info = Probe:Try("C_Spell.GetSpellInfo " .. name, S and S.GetSpellInfo, name)
-    return ok and type(info) == "table" and info.spellID or nil
+    if not ok then return nil end
+    local id = field(info, "spellID")
+    if isSecret(id) then return nil end
+    return id
 end
 
 -- Walks a talent config's trees: every node, the ones with a rank, and the spell behind each
@@ -208,10 +219,12 @@ local function walkTraits(configID, label, treeIDs)
     if type(T) ~= "table" then say(label .. ": C_Traits is missing"); lastTraits = r; return r end
     if not treeIDs then
         local ok, info = Probe:Try(label .. " GetConfigInfo", T.GetConfigInfo, configID)
-        treeIDs = ok and type(info) == "table" and info.treeIDs or nil
-        if ok and type(info) == "table" then
-            say(label .. ": config " .. show(configID) .. " " .. show(info.name) .. ", type " .. show(info.type)
-                .. ", trees " .. show(treeIDs and #treeIDs))
+        if ok then
+            treeIDs = field(info, "treeIDs")
+            if isSecret(treeIDs) then r.secrets = r.secrets + 1; treeIDs = nil end
+            local trees = type(treeIDs) == "table" and #treeIDs or nil
+            say(label .. ": config " .. show(configID) .. " " .. show(field(info, "name")) .. ", type "
+                .. show(field(info, "type")) .. ", trees " .. show(trees))
         end
     end
     if type(treeIDs) ~= "table" or #treeIDs == 0 then
@@ -219,20 +232,29 @@ local function walkTraits(configID, label, treeIDs)
     end
     for _, treeID in ipairs(treeIDs) do
         local okN, nodeIDs = Probe:Try(label .. " GetTreeNodes", T.GetTreeNodes, treeID)
-        for _, nodeID in ipairs(okN and type(nodeIDs) == "table" and nodeIDs or {}) do
+        if not okN or type(nodeIDs) ~= "table" or isSecret(nodeIDs) then nodeIDs = {} end
+        for _, nodeID in ipairs(nodeIDs) do
             r.nodes = r.nodes + 1
             local ok, node = Probe:Try(label .. " GetNodeInfo", T.GetNodeInfo, configID, nodeID)
-            local rank = ok and type(node) == "table" and node.activeRank or nil
+            local rank
+            if ok then rank = field(node, "activeRank") end
             if isSecret(rank) then r.secrets = r.secrets + 1
             elseif type(rank) == "number" and rank > 0 then
                 r.ranked = r.ranked + 1
-                local entryID = node.activeEntry and node.activeEntry.entryID
-                local okE, entry = Probe:Try(label .. " GetEntryInfo", T.GetEntryInfo, configID, entryID)
-                local defID = okE and type(entry) == "table" and entry.definitionID or nil
-                local okD, def = Probe:Try(label .. " GetDefinitionInfo", T.GetDefinitionInfo, defID)
-                local spellID = okD and type(def) == "table" and def.spellID or nil
+                local entryID = field(field(node, "activeEntry"), "entryID")
+                local defID, spellID
+                if isSecret(entryID) then r.secrets = r.secrets + 1
+                else
+                    local okE, entry = Probe:Try(label .. " GetEntryInfo", T.GetEntryInfo, configID, entryID)
+                    if okE then defID = field(entry, "definitionID") end
+                    if isSecret(defID) then r.secrets = r.secrets + 1; defID = nil end
+                end
+                if defID ~= nil then
+                    local okD, def = Probe:Try(label .. " GetDefinitionInfo", T.GetDefinitionInfo, defID)
+                    if okD then spellID = field(def, "spellID") end
+                end
                 if isSecret(spellID) then r.secrets = r.secrets + 1
-                elseif spellID then
+                elseif type(spellID) == "number" then
                     local name = spellName(spellID)
                     r.spells[#r.spells + 1] = spellID .. "@" .. rank .. (name and ("=" .. name) or "")
                     if spellID == POWER_INFUSION or name == PI_NAME then r.pi = rank; r.piID = spellID end
@@ -256,7 +278,7 @@ local function ownTraits()
     local piID, innID = idForName(PI_NAME), idForName("Innervate")
     say("own: Power Infusion known " .. show(pi) .. " (client id by name " .. show(piID) .. "), Innervate known "
         .. show(inn) .. " (client id by name " .. show(innID) .. ")")
-    if not ok or configID == nil then say("own: no active config"); return nil end
+    if not ok or isSecret(configID) or configID == nil then say("own: no active config (or a secret one)"); return nil end
     local r = walkTraits(configID, "own")
     r.knowsPI, r.knowsInnervate = pi, inn
     return r
@@ -270,13 +292,46 @@ local function inspectConfigID()
     return id or -1, id and "Constants" or "assumed -1"
 end
 
-local function inspectTraits()
+-- The inspect request and its reply (Codex, #53). INSPECT_READY carries the inspected GUID, and
+-- any addon's NotifyInspect fires it, so only the reply for the GUID we asked about counts. Its
+-- tree is read in the event handler itself, before a later inspect can replace the client's
+-- cached one. The GUID is another player's: it's kept for the match, logged only as a shape.
+local inspectWant, inspectGot
+
+local function inspectTraits(guid)
     local id, source = inspectConfigID()
     say("inspect: config " .. show(id) .. " (" .. source .. ")")
-    local spec = rawget(_G, "GetInspectSpecialization")
-    local _, specID = Probe:Try("GetInspectSpecialization", spec, "target")
-    say("inspect: GetInspectSpecialization(target) " .. show(specID))
+    -- The specialization is asked of "target" only while the target is still that player.
+    local okG, targetGUID = Probe:Try("UnitGUID target", rawget(_G, "UnitGUID"), "target")
+    if okG and not isSecret(targetGUID) and targetGUID == guid then
+        local _, specID = Probe:Try("GetInspectSpecialization", rawget(_G, "GetInspectSpecialization"), "target")
+        say("inspect: GetInspectSpecialization(target) " .. show(specID))
+    else
+        say("inspect: the target changed since the request; specialization not asked")
+    end
     return walkTraits(id, "inspect")
+end
+
+local inspectWatch = CreateFrame("Frame")
+Probe:RegisterEvents(inspectWatch, { "INSPECT_READY" })
+inspectWatch:SetScript("OnEvent", function(_, _, guid)
+    if not inspectWant or inspectGot then return end
+    if isSecret(guid) or guid ~= inspectWant then
+        say("inspect: a reply for another player (" .. Probe.Shape(guid) .. "), ignored")
+        return
+    end
+    inspectGot = inspectTraits(guid)
+end)
+
+-- The Inspect button: the target's GUID is the request. No target (or a secret GUID) fails the
+-- step, which stays for Retry or Skip.
+local function requestInspect()
+    local ok, guid = Probe:Try("UnitGUID target", rawget(_G, "UnitGUID"), "target")
+    if not ok or isSecret(guid) or guid == nil then error("no target to inspect (or its GUID is secret)", 0) end
+    inspectWant, inspectGot = guid, nil
+    say("inspect: requested for the target (" .. Probe.Shape(guid) .. ")")
+    local okN = Probe:Try("NotifyInspect", rawget(_G, "NotifyInspect"), "target")
+    return okN
 end
 
 -- ─── commands ───────────────────────────────────────────────────────────────
@@ -374,7 +429,7 @@ Probe:Steps("pin", {
 -- since 2026-11-04.
 
 Probe:Steps("cd", {
-    rev = 1,
+    rev = 2,                                   -- 2: the inspect reply must be the requested player's
     title = "Cooldown pane: own casts and talents (#52)",
     { text = "Out of combat, ideally on a Priest with Power Infusion or a Druid of 40+. Reading your "
           .. "talents through the traits system.", auto = true,
@@ -406,15 +461,13 @@ Probe:Steps("cd", {
       wait = function() if not combatState() then return true end; return false, "still in combat" end },
     { text = "Optional, skip if no one is around: target another player within inspect range, ideally "
           .. "a Priest of 40+ or a Druid, then press Inspect.", button = "Inspect",
-      run = function()
-          local ok, r = Probe:Try("NotifyInspect", rawget(_G, "NotifyInspect"), "target")
-          return ok
-      end },
-    { text = "Waiting for the inspect reply.", event = "INSPECT_READY", shapeOnly = true },
-    { text = "Reading their talents.", auto = true,
-      run = function()
-          local r = inspectTraits()
-          return r and r.nodes, r and r.ranked, r and #r.spells, r and r.pi
+      run = requestInspect },
+    { text = "Waiting for that player's inspect reply.", timeout = 30,
+      wait = function()
+          if inspectGot then
+              return true, inspectGot.nodes, inspectGot.ranked, #inspectGot.spells, inspectGot.pi
+          end
+          return false, "no reply for the inspected player yet"
       end },
     { text = "Type /reload (or press Reload now) to save the results.", reload = true },
 })
@@ -435,4 +488,5 @@ end)
 
 NS._test = { Probe = Probe, state = state, stateOK = stateOK, spells = spells, spellsOK = spellsOK,
              casts = function() return casts, lastCast end, walkTraits = walkTraits, ownTraits = ownTraits,
-             castSince = castSince }
+             castSince = castSince, requestInspect = requestInspect,
+             inspectState = function() return inspectWant, inspectGot end }

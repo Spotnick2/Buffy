@@ -143,6 +143,23 @@ WoW.DefineSpell(1399999, "Power Infusion")
 tr = T.walkTraits(5, "test", { 8 })
 H.eq(tr.pi, 1, "Power Infusion found by its name")
 H.eq(tr.piID, 1399999, "and its client id kept")
+
+-- The inspect reply must be the requested player's (Codex, #53): no target fails the step's
+-- run, another player's INSPECT_READY is ignored, and the matching one is read on arrival.
+WoW.units.target = nil
+H.check(not pcall(T.requestInspect), "no target: the Inspect run fails, so the step stays")
+WoW.SetUnit("target", { name = "Inspected Priest", guid = "Player-1-0000AAAA", class = "PRIEST" })
+H.check(pcall(T.requestInspect), "a target: the request is made")
+local want, got = T.inspectState()
+H.eq(want, "Player-1-0000AAAA", "the request keeps the target's GUID")
+WoW.fire("INSPECT_READY", "Player-1-0000BBBB")
+want, got = T.inspectState()
+H.eq(got, nil, "another player's reply is ignored")
+WoW.fire("INSPECT_READY", "Player-1-0000AAAA")
+want, got = T.inspectState()
+H.check(got ~= nil and got.label == "inspect" and got.nodes == 4, "the requested player's tree is read on its reply")
+WoW.fire("INSPECT_READY", "Player-1-0000AAAA")
+H.eq((select(2, T.inspectState())), got, "a later reply doesn't replace the first read")
 rawset(_G, "C_Traits", nil)
 
 -- Our own cast with a secret spell id: recorded as secret, never named or compared.

@@ -53,6 +53,11 @@ instances since 2026-11-04. So `cd` measures the two things left:
     "Innervate" (`C_Spell.GetSpellInfo(name)`) are logged too.
   - The inspect config is `Constants.TraitConsts.INSPECT_TRAIT_CONFIG_ID` if the client has it,
     otherwise -1 as on Retail. The log says which.
+  - Only the reply for the player we asked about counts: the Inspect button records the target's
+    GUID, and `INSPECT_READY` for any other GUID (another addon's inspect) is ignored. The tree is
+    read in that reply's handler, before a later inspect can replace the client's cached one, and
+    the specialization is asked only while the target is still that player.
+  - Every field the walk reads goes through `isSecret` before any truth test or comparison.
 
 `/fp bf talents` runs the tree walk on its own.
 

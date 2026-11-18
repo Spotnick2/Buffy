@@ -1,0 +1,10 @@
+## Interface: 16001
+## Title: BuffyProbe
+## Notes: Throwaway probe for Buffy: the in-game check of a library pin (#35). A ForeverProbe module: /fp bf
+## Author: Spotnick
+## Version: dev
+## Dependencies: ForeverProbe
+## OptionalDeps: Buffy
+## SavedVariables: BuffyProbeDB
+
+BuffyProbe.lua

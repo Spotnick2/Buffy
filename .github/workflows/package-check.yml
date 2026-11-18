@@ -35,8 +35,10 @@ jobs:
           echo "LIBGLASS=$RUNNER_TEMP/LibGlass" >> "$GITHUB_ENV"
           echo "LIBGROUPBUFFS=$RUNNER_TEMP/LibGroupBuffs" >> "$GITHUB_ENV"
       - name: Syntax and behavior
+        env:
+          FOREVERPROBE_OPTIONAL: "1"   # ForeverProbe is private and local: the probe test runs locally
         run: |
-          luac5.1 -p Buffy*.lua Classes/*.lua "$LIBGROUPBUFFS/LibGroupBuffs.lua"
+          luac5.1 -p Buffy*.lua Classes/*.lua Tools/BuffyProbe/BuffyProbe.lua "$LIBGROUPBUFFS/LibGroupBuffs.lua"
           for f in tests/test_*.lua; do lua5.1 "$f"; done
       - name: Only the requested tag at HEAD
         if: inputs.tag != ''

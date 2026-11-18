@@ -11,7 +11,7 @@ local groupAt = toc:find("Libs\\LibGroupBuffs-1.0", 1, true)
 H.check(glassAt and groupAt and glassAt < groupAt, "glass loaded before group library")
 local P = dofile("tests/pkgmeta.lua")
 local external = assert(P.externals())
-H.eq(external["Libs/LibGlass-1.0"].ref, "r11", "glass immutable release pin")
+H.eq(external["Libs/LibGlass-1.0"].ref, "r13", "glass immutable release pin")
 local pin = external["Libs/LibGroupBuffs-1.0"]
 H.eq(pin.kind, "tag", "library pinned to a release tag")
 H.eq(pin.ref, "r34", "library pinned to tested source (r34 = 1ede1c1)")

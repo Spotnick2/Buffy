@@ -4,7 +4,7 @@ The approved working-addon milestone is implemented. The owner reports successfu
 Priest and Mage testing and confirms Mark of the Wild works on Druid;
 see [ACCEPTANCE.md](ACCEPTANCE.md). The approved plan is preserved in [PLAN.md](PLAN.md).
 
-## Current state (2026-11-04)
+## Current state (2026-11-18)
 
 - Buffy: v0.1.0 is released on GitHub and CurseForge. v0.1.1-alpha3 (`tag: r33`) is on
   GitHub, Wago and CurseForge. alpha1 and alpha2 pinned the library by commit, and CurseForge
@@ -21,6 +21,10 @@ see [ACCEPTANCE.md](ACCEPTANCE.md). The approved plan is preserved in [PLAN.md](
   Buffy #36) and LibGlass r11. The owner chose to ship it before the in-game checklist, which
   now runs after the release with the r34 check (#35). Offline suite and staged package
   (47 runtime files) pass against an export of r34.
+- After v1.0.1 (2026-11-18): main pins LibGlass `tag: r13` (`5b2c9ab`). r12 makes the glass
+  fonts follow the client locale, and r13 adds `Glass.Button`, which Buffy does not use, plus 7 textures.
+  The offline suite passes on r11, r12 and r13 alike, and the staged package grows to 54 runtime
+  files. The next release ships r13. The window is checked in game on r13 with #35.
 - LibGroupBuffs: #69 merged and tagged `r32` (`b51d775`); #70 merged as `c7e2137`; its head
   `dcf34b7` (minor 33) tagged `r33` on 2026-10-24; `1ede1c1` (minor 34) tagged `r34` on
   2026-11-04, before its in-game check.
@@ -28,7 +32,7 @@ see [ACCEPTANCE.md](ACCEPTANCE.md). The approved plan is preserved in [PLAN.md](
   released yet (private repository, no tags).
 - `.work/LibGroupBuffs` is still at `dcf34b7` (r33), so it no longer matches the pin; v1.0.0
   was validated against `.work/LibGroupBuffs-r34`, a `git archive` export of r34.
-  `.work/LibGlass-r11` matches its pin. The other `.work` worktrees and staging folders are history.
+  `.work/LibGlass-r13` (a `git archive` export of r13) matches its pin; `.work/LibGlass-r11` is history. The other `.work` worktrees and staging folders are history.
 
 The rest of this document records the initial implementation as delivered.
 

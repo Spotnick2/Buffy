@@ -99,29 +99,46 @@ local function spellsOK(r)
         "unresolved " .. r.unresolved .. ", unknown " .. r.unknown .. ", class " .. show(r.class, true)
 end
 
--- A /buffy command, as typed. Returns the window's state after it.
+-- A /buffy command, as typed. Returns the window's state after it. A command
+-- that throws (or is missing) throws here too, after the state is logged, so the
+-- step's run fails: ForeverProbe records the error, keeps the step for Retry and
+-- hands the error to the error handler (BugSack). A caught error must never let
+-- the step complete and its check pass (Codex, #45).
 local function buffyCmd(arg)
     local slash = rawget(_G, "SlashCmdList") and SlashCmdList.BUFFY
-    local ok = Probe:Try("/buffy " .. arg, slash, arg)
+    local ok, err
+    if type(slash) ~= "function" then
+        ok, err = false, "SlashCmdList.BUFFY is missing (Buffy not loaded?)"
+    else
+        ok, err = pcall(slash, arg)
+    end
     local B = buffy()
     local visible = B and B.ui and B.ui:IsVisible()
     local grow = B and B.Get and B.Get("growDirection")
-    say("/buffy " .. arg .. ": " .. (ok and "ran" or "FAILED") .. "; visible " .. show(visible)
-        .. ", preview " .. show(B and B.previewActive) .. ", growth " .. show(grow))
+    say("/buffy " .. arg .. ": " .. (ok and "ran" or ("ERROR " .. show(err, true))) .. "; visible "
+        .. show(visible) .. ", preview " .. show(B and B.previewActive) .. ", growth " .. show(grow))
+    if not ok then error(err, 0) end
     return ok, visible, B and B.previewActive or false, grow
 end
 
 -- The player's successful casts, counted (spell ids only).
 local casts, lastCast, armedAt = 0, nil, nil
 local castWatch = CreateFrame("Frame")
-if not Probe:Try("UNIT_SPELLCAST_SUCCEEDED (player)", castWatch.RegisterUnitEvent, castWatch,
-        "UNIT_SPELLCAST_SUCCEEDED", "player") then
+-- RegisterUnitEvent returns registered:bool (70959 dump); anything but true falls
+-- back to the plain event, filtered on the unit below.
+local okUnit, registered = Probe:Try("UNIT_SPELLCAST_SUCCEEDED (player)", castWatch.RegisterUnitEvent, castWatch,
+    "UNIT_SPELLCAST_SUCCEEDED", "player")
+if not (okUnit and registered == true) then
     Probe:RegisterEvents(castWatch, { "UNIT_SPELLCAST_SUCCEEDED" })
 end
 castWatch:SetScript("OnEvent", function(_, _, unit, _, spellID)
     if unit ~= "player" then return end
     casts = casts + 1
-    local ok, name = Probe:Try("GetSpellInfo", rawget(_G, "GetSpellInfo"), spellID)
+    -- The global GetSpellInfo is gone on Forever; Buffy's adapter (LibGroupBuffs'
+    -- API.SpellName) reads C_Spell (Codex, #45).
+    local B = buffy()
+    local spellName = B and B.API and B.API.SpellName
+    local ok, name = Probe:Try("SpellName", spellName, spellID)
     lastCast = { id = spellID, name = ok and name or nil }
 end)
 
@@ -139,7 +156,7 @@ Probe:Command("clear", function() Probe:ClearLog(); say("log cleared") end, "emp
 -- ─── the procedure ──────────────────────────────────────────────────────────
 
 Probe:Steps("pin", {
-    rev = 1,
+    rev = 2,                                   -- 2: a failing /buffy command fails its step
     title = "Buffy on its library pin (#35)",
     { text = "Out of combat, on a Priest, Druid or Mage. Type /console scriptErrors 1 once, then press Next." },
     { text = "Reading the versions: client, Buffy, and the LibGroupBuffs and LibGlass copies running.",
@@ -150,7 +167,9 @@ Probe:Steps("pin", {
           return s.build, s.buffy, s.class, s.gb, s.glass
       end,
       check = function() return stateOK() end },
-    { text = "No Lua error since login or /reload (BugSack, or the error window)?", ask = true },
+    -- Asked so that Yes is the problem: "No Lua error?" answered No was ambiguous (rev 1, 2026-11-18).
+    { text = "Did a Lua error appear since login or /reload (Bugsy, BugSack or the error window)? "
+          .. "Yes = an error appeared; type it in the Note box.", ask = true },
     { text = "Run /buffy help. It prints in chat and ends with the spell list.", button = "Run /buffy help",
       screenshot = "buffy help",
       run = function() local ok = buffyCmd("help"); local r = spells(); return ok, r and r.unresolved, r and r.unknown end,
@@ -167,8 +186,12 @@ Probe:Steps("pin", {
     { text = "Show the 8-member preview.", button = "/buffy test 8", screenshot = "preview 8",
       run = function() return buffyCmd("test 8") end },
     { text = "Rows, icons and timers look as before?", ask = true },
-    { text = "In /buffy config, switch Window growth to the other direction. The rows grow the other way? "
-          .. "Switch it back afterwards.", ask = true, screenshot = "growth flipped" },
+    -- The shot is taken as the step completes, so the flipped layout must still be up then (rev 1
+    -- asked to switch back in the same step, and its shot showed the original growth).
+    { text = "In /buffy config, switch Window growth to the other direction and close the config. "
+          .. "Do the rows grow the other way? (Leave it flipped for the screenshot.)", ask = true,
+      screenshot = "growth flipped" },
+    { text = "Switch Window growth back in /buffy config, then press Next." },
     { text = "End the preview.", button = "/buffy test off",
       run = function() return buffyCmd("test off") end,
       check = function() local B = buffy(); return B and not B.previewActive, "preview " .. show(B and B.previewActive) end },
@@ -227,4 +250,5 @@ boot:SetScript("OnEvent", function(_, _, name)
     say("loaded (" .. BuffyProbeDB.loads .. " loads). /fp bf for the commands; /fp steps bf pin")
 end)
 
-NS._test = { Probe = Probe, state = state, stateOK = stateOK, spells = spells, spellsOK = spellsOK }
+NS._test = { Probe = Probe, state = state, stateOK = stateOK, spells = spells, spellsOK = spellsOK,
+             casts = function() return casts, lastCast end }

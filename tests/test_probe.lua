@@ -63,4 +63,55 @@ H.check(logged:find("spells PRIEST", 1, true) ~= nil, "the report is in the save
 -- The procedure is registered under the module.
 H.check(ForeverProbe.procedures["BuffyProbe/pin"] ~= nil, "the pin procedure is defined")
 
+-- The player's casts: counted, named through Buffy's adapter (the global
+-- GetSpellInfo is gone on Forever), and another unit's cast ignored (Codex, #45).
+local spellID = Buffy.class.defs[1].snglID
+local logBefore = #BuffyProbeDB.log
+WoW.dispatch("UNIT_SPELLCAST_SUCCEEDED", "party1", "Cast-1", spellID)
+H.eq((T.casts()), 0, "another unit's cast is not counted")
+WoW.dispatch("UNIT_SPELLCAST_SUCCEEDED", "player", "Cast-2", spellID)
+local n, last = T.casts()
+H.eq(n, 1, "the player's cast is counted")
+H.eq(last and last.id, spellID, "cast spell id")
+H.eq(last and last.name, Buffy.API.SpellName(spellID), "cast named through Buffy.API.SpellName")
+H.check(last and last.name ~= nil, "the cast has a name")
+local newLines = table.concat(BuffyProbeDB.log, "\n", logBefore + 1)
+H.check(not newLines:find("MISSING", 1, true), "no MISSING diagnostic on a cast")
+
+-- Through the procedure: a /buffy command that throws fails its step. The run
+-- errors, the step stays for Retry, and it neither completes nor passes its
+-- check (Codex, #45). The panel isn't built here: the shared stub doesn't model
+-- its widgets, so Show and Refresh are no-ops for this test.
+local FP = ForeverProbe
+FP.Steps.Show, FP.Steps.Refresh = function() end, function() end
+local handled = {}
+WoW.allowGlobal("geterrorhandler")         -- a client global the shared stub leaves out
+local realHandler = rawget(_G, "geterrorhandler")
+geterrorhandler = function() return function(e) handled[#handled + 1] = e end end
+H.check(T.Probe:StartSteps("pin"), "the procedure starts")
+local rec = ForeverProbeDB.steps.records["BuffyProbe/pin"]
+FP.Steps.Next()                                  -- 1: the setup step; 2 runs on arrival
+H.eq(rec.results[2] and rec.results[2].check, gbMinor >= 34 and glassMinor >= 13 and "PASS" or "FAIL",
+    "step 2's check follows the loaded minors")
+H.eq(rec.at, 3, "on the Lua-error question")
+FP.Steps.Answer(true)                            -- 3: yes
+H.eq(rec.at, 4, "on /buffy help")
+local realSlash = SlashCmdList.BUFFY
+SlashCmdList.BUFFY = function() error("boom from /buffy", 0) end
+FP.Steps.Run()
+local r4 = rec.results[4] or {}
+H.eq(rec.at, 4, "a throwing command keeps the step")
+H.eq(r4.errors, 1, "the error is counted on the step")
+H.check(r4.status == nil and r4.check == nil, "the step neither completed nor ran its check")
+H.check(tostring(r4.lastError):find("boom from /buffy", 1, true) ~= nil, "the command's error is recorded")
+H.eq(#handled, 1, "the error reached the error handler")
+H.check(table.concat(BuffyProbeDB.log, "\n"):find("/buffy help: ERROR", 1, true) ~= nil, "the failure is logged")
+SlashCmdList.BUFFY = nil                         -- a missing handler fails the same way
+FP.Steps.Run()
+H.eq(rec.at, 4, "a missing command keeps the step")
+H.eq((rec.results[4] or {}).errors, 2, "and counts as an error")
+SlashCmdList.BUFFY = realSlash
+FP.Steps.Stop("test over")
+rawset(_G, "geterrorhandler", realHandler)
+
 H.done("probe")

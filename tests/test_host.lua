@@ -65,6 +65,13 @@ for _, class in ipairs({ "PRIEST", "DRUID", "MAGE", "WARRIOR" }) do
         H.check(help:find("? instead of a timer: buff state unreadable", 1, true) ~= nil, "help names the aura ?")
         H.check(help:find("could not be read", 1, true) == nil, "no unresolved count on a healthy client")
         H.check(help:find("unknown origin", 1, true) == nil, "no unknown-origin count on a healthy client")
+        -- A bare "|" starts an escape in the client's chat (|h a hyperlink, |c a colour), so
+        -- every | printed must be part of |cAARRGGBB, |r or a doubled || (#49).
+        SlashCmdList.BUFFY("test 9")                -- the usage line for a bad argument
+        for _, line in ipairs(WoW.messages) do
+            local bare = line:gsub("||", ""):gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
+            H.check(not bare:find("|", 1, true), "no bare | in a printed line: " .. line)
+        end
         local first = B.class.defs[1]
         local single, group = first.snglFrom, first.grpFrom
         first.snglFrom, first.grpFrom = "fallback", "unknown"

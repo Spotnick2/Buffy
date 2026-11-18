@@ -116,4 +116,48 @@ SlashCmdList.BUFFY = realSlash
 FP.Steps.Stop("test over")
 rawset(_G, "geterrorhandler", realHandler)
 
+-- #52, the cooldown pane's measurements.
+H.check(ForeverProbe.procedures["BuffyProbe/cd"] ~= nil, "the cd procedure is defined")
+
+-- The traits walk, over a fake tree: Power Infusion by Classic's id, a secret rank and a secret
+-- spell (counted, never compared), and an untaken node.
+local entries = { [21] = 210, [31] = 310, [51] = 510 }
+local defs = { [210] = 10060, [310] = WoW.Secret("spell"), [510] = 1399999 }
+local nodes = { [1] = 0, [2] = 1, [3] = 2, [4] = WoW.Secret("rank"), [5] = 1 }
+local entryOf = { [2] = 21, [3] = 31, [5] = 51 }
+rawset(_G, "C_Traits", {
+    GetConfigInfo = function(id) return { name = "Priest", type = 4, treeIDs = { 7 } } end,
+    GetTreeNodes = function(tree) return tree == 7 and { 1, 2, 3, 4 } or { 5 } end,
+    GetNodeInfo = function(_, n) return { activeRank = nodes[n], activeEntry = { entryID = entryOf[n] } } end,
+    GetEntryInfo = function(_, e) return { definitionID = entries[e] } end,
+    GetDefinitionInfo = function(d) return { spellID = defs[d] } end,
+})
+local tr = T.walkTraits(5, "test")
+H.eq(tr.nodes, 4, "every node of the tree walked")
+H.eq(tr.ranked, 2, "two nodes with a plain rank")
+H.eq(tr.secrets, 2, "a secret rank and a secret spell counted")
+H.eq(#tr.spells, 1, "one plain spell read")
+H.eq(tr.pi, 1, "Power Infusion found by Classic's id")
+-- Forever re-ids spells: a taken spell named Power Infusion counts whatever its id.
+WoW.DefineSpell(1399999, "Power Infusion")
+tr = T.walkTraits(5, "test", { 8 })
+H.eq(tr.pi, 1, "Power Infusion found by its name")
+H.eq(tr.piID, 1399999, "and its client id kept")
+rawset(_G, "C_Traits", nil)
+
+-- Our own cast with a secret spell id: recorded as secret, never named or compared.
+local before2 = select(1, T.casts())
+WoW.fire("UNIT_SPELLCAST_SUCCEEDED", "player", WoW.Secret("guid"), WoW.Secret("id"))
+local n2, sc = T.casts()
+H.eq(n2, before2 + 1, "the secret cast is counted")
+H.check(sc.secretID == true and sc.secretGUID == true, "its spell id and cast guid read as secret")
+H.check(sc.id == nil and sc.name == nil, "a secret id is neither kept nor named")
+-- A plain cast in combat completes the in-combat wait.
+WoW.inCombat = true
+H.check(not T.castSince(true), "the first poll arms the wait")   -- as the step's first poll does
+WoW.fire("UNIT_SPELLCAST_SUCCEEDED", "player", "Cast-3", spellID)
+local okWait, waitID = T.castSince(true)
+H.check(okWait and waitID == spellID, "a plain in-combat cast completes the combat wait")
+WoW.inCombat = false
+
 H.done("probe")

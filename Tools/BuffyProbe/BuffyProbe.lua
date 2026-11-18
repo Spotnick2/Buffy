@@ -3,6 +3,9 @@
 --   /fp bf state          versions: client, Buffy, the running LibGroupBuffs and LibGlass copies
 --   /fp bf spells         Buffy's spell report: every buff name, where it came from, the counts
 --   /fp steps bf pin      the guided check of a library pin (Buffy #35: LibGroupBuffs r34)
+--   /fp bf talents        your talents through the traits system (#52)
+--   /fp steps bf cd       what a cooldown pane can read (#52): our own instant casts' spell id in
+--                         and out of combat, and the traits tree, ours and an inspected player's
 --
 -- Read-only towards Buffy, apart from the /buffy commands a step runs on the owner's click
 -- (help, show, test 5|8|off): the same commands the owner would type. It never touches
@@ -131,26 +134,156 @@ local okUnit, registered = Probe:Try("UNIT_SPELLCAST_SUCCEEDED (player)", castWa
 if not (okUnit and registered == true) then
     Probe:RegisterEvents(castWatch, { "UNIT_SPELLCAST_SUCCEEDED" })
 end
-castWatch:SetScript("OnEvent", function(_, _, unit, _, spellID)
-    if unit ~= "player" then return end
-    casts = casts + 1
-    -- The global GetSpellInfo is gone on Forever; Buffy's adapter (LibGroupBuffs'
-    -- API.SpellName) reads C_Spell (Codex, #45).
-    local B = buffy()
-    local spellName = B and B.API and B.API.SpellName
-    local ok, name = Probe:Try("SpellName", spellName, spellID)
-    lastCast = { id = spellID, name = ok and name or nil }
-end)
-
 local function combatState()
     local f = rawget(_G, "InCombatLockdown")
     return type(f) == "function" and f() or false
+end
+
+-- issecretvalue, read through rawget: false when the client (or a stub) lacks it.
+local function isSecret(v)
+    local f = rawget(_G, "issecretvalue")
+    return type(f) == "function" and f(v) and true or false
+end
+
+castWatch:SetScript("OnEvent", function(_, _, unit, castGUID, spellID)
+    if unit ~= "player" then return end
+    casts = casts + 1
+    -- #52: whether our own cast's spell id stays readable, in and out of combat. A secret is
+    -- never compared or named: SpellName is asked only for a plain id.
+    local secretID, secretGUID, combat = isSecret(spellID), isSecret(castGUID), combatState()
+    local name
+    if not secretID then
+        -- The global GetSpellInfo is gone on Forever; Buffy's adapter (LibGroupBuffs'
+        -- API.SpellName) reads C_Spell (Codex, #45).
+        local B = buffy()
+        local spellName = B and B.API and B.API.SpellName
+        local ok, n = Probe:Try("SpellName", spellName, spellID)
+        name = ok and n or nil
+    end
+    lastCast = { id = not secretID and spellID or nil, name = name, secretID = secretID,
+                 secretGUID = secretGUID, combat = combat, n = casts }
+    say("cast #" .. casts .. ": spellID " .. (secretID and "<secret>" or show(spellID)) .. " ("
+        .. show(name) .. "), castGUID " .. (secretGUID and "<secret>" or "plain") .. ", combat " .. show(combat))
+end)
+
+-- A cast after the step's Arm (or after the step was first polled), optionally in combat.
+local function castSince(wantCombat)
+    if not armedAt then armedAt = casts end
+    if casts > armedAt and lastCast and (wantCombat == nil or lastCast.combat == wantCombat) then
+        return true, lastCast.id, lastCast.name, lastCast.secretID, lastCast.combat
+    end
+    return false, wantCombat and "no cast in combat yet" or "no cast yet"
+end
+
+-- ─── #52: the traits tree (who took Power Infusion) ─────────────────────────
+
+-- Classic's ids. Forever re-ids some spells (Mark of the Wild was cast as 1328375 on 70959),
+-- so a taken spell also counts as Power Infusion by its name, and the ids the client gives for
+-- both names are logged.
+local POWER_INFUSION, INNERVATE = 10060, 29166
+local PI_NAME = "Power Infusion"
+
+local function spellName(id)
+    local B = buffy()
+    local f = B and B.API and B.API.SpellName
+    local ok, n = Probe:Try("SpellName", f, id)
+    return ok and n or nil
+end
+
+-- The id the client gives for a spell name (C_Spell.GetSpellInfo takes a name too).
+local function idForName(name)
+    local S = rawget(_G, "C_Spell")
+    local ok, info = Probe:Try("C_Spell.GetSpellInfo " .. name, S and S.GetSpellInfo, name)
+    return ok and type(info) == "table" and info.spellID or nil
+end
+
+-- Walks a talent config's trees: every node, the ones with a rank, and the spell behind each
+-- taken entry. Read-only. configID is ours (C_ClassTalents.GetActiveConfigID) or the inspect
+-- config. treeIDs default to the config's own (C_Traits.GetConfigInfo); a secret anywhere is
+-- counted, never compared.
+local lastTraits
+local function walkTraits(configID, label, treeIDs)
+    local T = rawget(_G, "C_Traits")
+    local r = { label = label, config = configID, nodes = 0, ranked = 0, spells = {}, secrets = 0, pi = nil }
+    if type(T) ~= "table" then say(label .. ": C_Traits is missing"); lastTraits = r; return r end
+    if not treeIDs then
+        local ok, info = Probe:Try(label .. " GetConfigInfo", T.GetConfigInfo, configID)
+        treeIDs = ok and type(info) == "table" and info.treeIDs or nil
+        if ok and type(info) == "table" then
+            say(label .. ": config " .. show(configID) .. " " .. show(info.name) .. ", type " .. show(info.type)
+                .. ", trees " .. show(treeIDs and #treeIDs))
+        end
+    end
+    if type(treeIDs) ~= "table" or #treeIDs == 0 then
+        say(label .. ": no tree for config " .. show(configID)); lastTraits = r; return r
+    end
+    for _, treeID in ipairs(treeIDs) do
+        local okN, nodeIDs = Probe:Try(label .. " GetTreeNodes", T.GetTreeNodes, treeID)
+        for _, nodeID in ipairs(okN and type(nodeIDs) == "table" and nodeIDs or {}) do
+            r.nodes = r.nodes + 1
+            local ok, node = Probe:Try(label .. " GetNodeInfo", T.GetNodeInfo, configID, nodeID)
+            local rank = ok and type(node) == "table" and node.activeRank or nil
+            if isSecret(rank) then r.secrets = r.secrets + 1
+            elseif type(rank) == "number" and rank > 0 then
+                r.ranked = r.ranked + 1
+                local entryID = node.activeEntry and node.activeEntry.entryID
+                local okE, entry = Probe:Try(label .. " GetEntryInfo", T.GetEntryInfo, configID, entryID)
+                local defID = okE and type(entry) == "table" and entry.definitionID or nil
+                local okD, def = Probe:Try(label .. " GetDefinitionInfo", T.GetDefinitionInfo, defID)
+                local spellID = okD and type(def) == "table" and def.spellID or nil
+                if isSecret(spellID) then r.secrets = r.secrets + 1
+                elseif spellID then
+                    local name = spellName(spellID)
+                    r.spells[#r.spells + 1] = spellID .. "@" .. rank .. (name and ("=" .. name) or "")
+                    if spellID == POWER_INFUSION or name == PI_NAME then r.pi = rank; r.piID = spellID end
+                end
+            end
+        end
+    end
+    say(label .. ": " .. r.nodes .. " nodes, " .. r.ranked .. " with a rank, " .. #r.spells
+        .. " spells read, " .. r.secrets .. " secret; Power Infusion " .. (r.pi and ("rank " .. r.pi) or "not taken"))
+    if #r.spells > 0 then say(label .. " spells (id@rank=name): " .. table.concat(r.spells, ", ")) end
+    lastTraits = r
+    return r
+end
+
+local function ownTraits()
+    local C = rawget(_G, "C_ClassTalents")
+    local ok, configID = Probe:Try("GetActiveConfigID", C and C.GetActiveConfigID)
+    local known = rawget(_G, "IsPlayerSpell")
+    local _, pi = Probe:Try("IsPlayerSpell PI", known, POWER_INFUSION)
+    local _, inn = Probe:Try("IsPlayerSpell Innervate", known, INNERVATE)
+    local piID, innID = idForName(PI_NAME), idForName("Innervate")
+    say("own: Power Infusion known " .. show(pi) .. " (client id by name " .. show(piID) .. "), Innervate known "
+        .. show(inn) .. " (client id by name " .. show(innID) .. ")")
+    if not ok or configID == nil then say("own: no active config"); return nil end
+    local r = walkTraits(configID, "own")
+    r.knowsPI, r.knowsInnervate = pi, inn
+    return r
+end
+
+-- The inspected player's tree, after INSPECT_READY. The inspect config is
+-- Constants.TraitConsts.INSPECT_TRAIT_CONFIG_ID on Retail (-1); the dump doesn't list it.
+local function inspectConfigID()
+    local C = rawget(_G, "Constants")
+    local id = type(C) == "table" and type(C.TraitConsts) == "table" and C.TraitConsts.INSPECT_TRAIT_CONFIG_ID
+    return id or -1, id and "Constants" or "assumed -1"
+end
+
+local function inspectTraits()
+    local id, source = inspectConfigID()
+    say("inspect: config " .. show(id) .. " (" .. source .. ")")
+    local spec = rawget(_G, "GetInspectSpecialization")
+    local _, specID = Probe:Try("GetInspectSpecialization", spec, "target")
+    say("inspect: GetInspectSpecialization(target) " .. show(specID))
+    return walkTraits(id, "inspect")
 end
 
 -- ─── commands ───────────────────────────────────────────────────────────────
 
 Probe:Command("state", function() stateOK(state()) end, "client, Buffy and the running library copies")
 Probe:Command("spells", function() spells() end, "Buffy's spell report and its counts")
+Probe:Command("talents", function() ownTraits() end, "your talents through the traits system (#52)")
 Probe:Command("clear", function() Probe:ClearLog(); say("log cleared") end, "empty the saved log")
 
 -- ─── the procedure ──────────────────────────────────────────────────────────
@@ -235,6 +368,57 @@ Probe:Steps("pin", {
     { text = "Type /reload (or press Reload now) to save the results.", reload = true },
 })
 
+-- ─── #52: what a cooldown pane can read ────────────────────────────────────
+-- Addon messages in combat and in instances are not asked: delivery in combat was measured on
+-- 70790 (porting guide, PARTY/RAID), and the owner reports addon messaging working in instances
+-- since 2026-11-04.
+
+Probe:Steps("cd", {
+    rev = 1,
+    title = "Cooldown pane: own casts and talents (#52)",
+    { text = "Out of combat, ideally on a Priest with Power Infusion or a Druid of 40+. Reading your "
+          .. "talents through the traits system.", auto = true,
+      run = function()
+          local r = ownTraits()
+          return r and r.nodes, r and r.ranked, r and #r.spells, r and r.pi
+      end,
+      check = function()
+          local r = lastTraits
+          return r ~= nil and r.nodes > 0, "nodes " .. show(r and r.nodes) .. ", ranked " .. show(r and r.ranked)
+      end },
+    { text = "Press Arm, then cast an instant spell out of combat (a buff is fine).", button = "Arm",
+      run = function() armedAt = casts; return casts end },
+    { text = "Cast it now, out of combat.", timeout = 180, wait = function() return castSince(false) end,
+      check = function()
+          return lastCast ~= nil and not lastCast.secretID, "spellID " .. (lastCast and lastCast.secretID and "secret" or "plain")
+      end },
+    { text = "Enter combat (a training dummy or a mob).", timeout = 600,
+      wait = function() if combatState() then return true end; return false, "not in combat yet" end },
+    { text = "Press Arm, then cast an instant spell in combat: Power Infusion or Innervate if you have it, "
+          .. "otherwise any instant (a buff on yourself is fine).", button = "Arm",
+      run = function() armedAt = casts; return casts end },
+    { text = "Cast it now, in combat.", timeout = 300, wait = function() return castSince(true) end,
+      check = function()
+          return lastCast ~= nil and lastCast.combat and not lastCast.secretID,
+              "spellID " .. (lastCast and lastCast.secretID and "secret" or "plain") .. " in combat"
+      end },
+    { text = "Leave combat.", timeout = 600,
+      wait = function() if not combatState() then return true end; return false, "still in combat" end },
+    { text = "Optional, skip if no one is around: target another player within inspect range, ideally "
+          .. "a Priest of 40+ or a Druid, then press Inspect.", button = "Inspect",
+      run = function()
+          local ok, r = Probe:Try("NotifyInspect", rawget(_G, "NotifyInspect"), "target")
+          return ok
+      end },
+    { text = "Waiting for the inspect reply.", event = "INSPECT_READY", shapeOnly = true },
+    { text = "Reading their talents.", auto = true,
+      run = function()
+          local r = inspectTraits()
+          return r and r.nodes, r and r.ranked, r and #r.spells, r and r.pi
+      end },
+    { text = "Type /reload (or press Reload now) to save the results.", reload = true },
+})
+
 -- ─── boot ───────────────────────────────────────────────────────────────────
 
 local boot = CreateFrame("Frame")
@@ -250,4 +434,5 @@ boot:SetScript("OnEvent", function(_, _, name)
 end)
 
 NS._test = { Probe = Probe, state = state, stateOK = stateOK, spells = spells, spellsOK = spellsOK,
-             casts = function() return casts, lastCast end }
+             casts = function() return casts, lastCast end, walkTraits = walkTraits, ownTraits = ownTraits,
+             castSince = castSince }

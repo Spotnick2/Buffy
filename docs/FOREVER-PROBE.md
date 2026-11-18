@@ -33,6 +33,29 @@ Checked offline, not in game: CurseForge's own zips of v1.0.0 (file 9431326) and
 pass `tests/check_package.py` (47 runtime files, library bytes at r34 and r11) and carry no
 `Libs/LibGroupBuffs-1.0/docs`, `tests` or `Tools` (2026-11-18).
 
+## `cd`: what a cooldown pane can read (#52)
+
+The pane (#52) would list the group's Innervate and Power Infusion providers. Magely's probe
+measured that another player's `UNIT_SPELLCAST_SUCCEEDED` carries a **secret** spell id (70959), so
+the only source is each provider announcing its own cast by addon message. Addon messages in
+combat were measured on 70790 (porting guide, PARTY and RAID), and the owner reports them working in
+instances since 2026-11-04. So `cd` measures the two things left:
+
+- **Our own instant cast in combat:** does `UNIT_SPELLCAST_SUCCEEDED`'s `spellID` stay plain? It's
+  measured out of combat and then in combat. Each cast logs whether `spellID` and `castGUID` are
+  secret, and the spell's name. The checks pass only on a plain id. The 70338 measurement
+  (`UnitCastingInfo`) covered cast-time spells, not instants.
+- **The traits tree** (`C_ClassTalents.GetActiveConfigID`, then `C_Traits` config → trees → nodes →
+  entry → definition → spell): how many nodes, which have a rank, and the spell behind each, for us
+  and for an inspected player (`NotifyInspect`, `INSPECT_READY`, the inspect config).
+  - Power Infusion is matched by Classic's id (10060) **or by its name**, since Forever re-ids some
+    spells (Mark of the Wild cast as 1328375). The ids the client gives for "Power Infusion" and
+    "Innervate" (`C_Spell.GetSpellInfo(name)`) are logged too.
+  - The inspect config is `Constants.TraitConsts.INSPECT_TRAIT_CONFIG_ID` if the client has it,
+    otherwise -1 as on Retail. The log says which.
+
+`/fp bf talents` runs the tree walk on its own.
+
 ## Results
 
 ### `pin` rev 1: LibGroupBuffs r34 + LibGlass r13 (#35), 2026-11-18

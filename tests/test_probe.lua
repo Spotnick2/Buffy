@@ -93,23 +93,21 @@ local rec = ForeverProbeDB.steps.records["BuffyProbe/pin"]
 FP.Steps.Next()                                  -- 1: the setup step; 2 runs on arrival
 H.eq(rec.results[2] and rec.results[2].check, gbMinor >= 34 and glassMinor >= 13 and "PASS" or "FAIL",
     "step 2's check follows the loaded minors")
-H.eq(rec.at, 3, "on the Lua-error question")
-FP.Steps.Answer(true)                            -- 3: yes
-H.eq(rec.at, 4, "on /buffy help")
+H.eq(rec.at, 3, "on /buffy help (no Lua-error question: Bugsy is read instead)")
 local realSlash = SlashCmdList.BUFFY
 SlashCmdList.BUFFY = function() error("boom from /buffy", 0) end
 FP.Steps.Run()
-local r4 = rec.results[4] or {}
-H.eq(rec.at, 4, "a throwing command keeps the step")
-H.eq(r4.errors, 1, "the error is counted on the step")
-H.check(r4.status == nil and r4.check == nil, "the step neither completed nor ran its check")
-H.check(tostring(r4.lastError):find("boom from /buffy", 1, true) ~= nil, "the command's error is recorded")
+local r3 = rec.results[3] or {}
+H.eq(rec.at, 3, "a throwing command keeps the step")
+H.eq(r3.errors, 1, "the error is counted on the step")
+H.check(r3.status == nil and r3.check == nil, "the step neither completed nor ran its check")
+H.check(tostring(r3.lastError):find("boom from /buffy", 1, true) ~= nil, "the command's error is recorded")
 H.eq(#handled, 1, "the error reached the error handler")
 H.check(table.concat(BuffyProbeDB.log, "\n"):find("/buffy help: ERROR", 1, true) ~= nil, "the failure is logged")
 SlashCmdList.BUFFY = nil                         -- a missing handler fails the same way
 FP.Steps.Run()
-H.eq(rec.at, 4, "a missing command keeps the step")
-H.eq((rec.results[4] or {}).errors, 2, "and counts as an error")
+H.eq(rec.at, 3, "a missing command keeps the step")
+H.eq((rec.results[3] or {}).errors, 2, "and counts as an error")
 SlashCmdList.BUFFY = realSlash
 FP.Steps.Stop("test over")
 rawset(_G, "geterrorhandler", realHandler)

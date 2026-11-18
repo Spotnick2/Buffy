@@ -22,7 +22,9 @@ those files itself and opens the screenshots with `..\ForeverProbe\Tools\screens
 Measured: the client build, the running LibGroupBuffs and LibGlass minors (at least `EXPECT` in the
 probe: r34 and r13; a newer copy loaded by Priestly, Wildly or Magely wins through LibStub), which of
 those three are loaded, and the spell report's counts (`unresolved` and `unknown` must be 0) on two
-classes. Asked, with screenshots: no Lua error, the window opening, moving, minimizing and restoring,
+classes. Lua errors and blocked actions aren't asked: the session reads Bugsy's
+`!Bugsy.lua` (per session, stacks included) and ForeverProbe's host log afterwards. Asked, with
+screenshots: the window opening, moving, minimizing and restoring,
 the 5 and 8 previews and both growth directions, a click casting on the member clicked, the tooltip
 and timer colours, close and minimize in combat, a battleground's `?` marks (optional), and the vendor
 restock and reagent footer.
@@ -33,4 +35,29 @@ pass `tests/check_package.py` (47 runtime files, library bytes at r34 and r11) a
 
 ## Results
 
-Not run yet.
+### `pin` rev 1: LibGroupBuffs r34 + LibGlass r13 (#35), 2026-11-18
+
+Client 1.60.1.70959 (enUS), Buffy `dev` from main after #43 (deployed with `.work/LibGroupBuffs-r34`
+and `.work/LibGlass-r13`), account SPOTNICK3. Druid level 14 (ForeverProbe run #421), then Mage after a relog (#422). Steps 1–24
+done; step 25 (`/reload` to save) was replaced by a logout, which wrote everything to disk.
+
+| What | Result |
+|---|---|
+| Running copies | LibGroupBuffs minor 34, `ready` 34; LibGlass minor 13. Loaded alongside Priestly v2.1.0, Wildly v1.1.0 and Magely v1.1.0 (Druid); on the Mage, Magely was not loaded. CHECK PASS |
+| Lua errors and blocked actions | None. Bugsy (`!Bugsy.lua`, SPOTNICK3) holds 0 problems in sessions 104–106, which cover both runs, with `dropped` 0. ForeverProbe's host log has no `ADDON_ACTION_BLOCKED` in #421 or #422. Bugsy's 19 `ADDON_ACTION_BLOCKED: 'Buffy' …` entries of session 103 (16:37, before this run) come from LibGroupBuffsProbe's deliberate in-combat sweep: that probe is on every stack. Step 3 asked the owner instead and got an ambiguous "No"; rev 3 drops the question, since Bugsy answers it |
+| `/buffy help` and the spell report | Ran without error. Druid: 2 buffs, 3 names, 2 learned (Gift of the Wild not learned at 14), 0 unresolved, 0 unknown, 0 unreadable ranks. Mage: 3 buffs, 4 names, 3 learned, all 0. CHECK PASS on both |
+| Window | Opened; moved, minimized and restored normally (yes) |
+| Preview | `/buffy test 5` and `test 8` showed 5 and 8 groups (screenshot: rows, icons and timers as before, yes); `test off` returned to live data. CHECK PASS |
+| Growth | Both directions work (yes). The screenshot was taken after switching back, so it shows only the default; rev 2 keeps the flipped layout up for the shot |
+| Click-cast | One cast counted after a click on Buffy's window: spell 1328375, Mark of the Wild (its timer went from 43:48 at 16:53:26 to 57:11 at 16:57:37). It landed on the target clicked (yes). Its name wasn't recorded (the removed global `GetSpellInfo`, fixed in #45) |
+| Tooltip and timer colours | Right (yes). No screenshot: the step relied on the owner typing `/fp shot` |
+| Combat | Entered and left with the window open; close and minimize behaved as before in combat (yes); the window settled afterwards (yes, screenshot) |
+| Battleground `?` marks | Skipped |
+| Vendor | MERCHANT_SHOW at a reagent vendor (Horthus, Orgrimmar); restock and the reagent footer behaved as in beta1 (yes). The Druid had no Gift of the Wild, so no reagent purchase was due: this doesn't test restock buying (#10) |
+
+The screenshots were looked at and then deleted with `screenshots.ps1 -Remove`.
+
+**r36.** LibGroupBuffs r36 (window text in LibGlass's language font) was deployed by Priestly at
+17:37 on account SPOTNICK2, and LibStub ran it for every window, Buffy's included. Bugsy (SPOTNICK2) holds
+0 problems for that session. Buffy's own check of r36 is #46, still open: the minor that ran isn't
+logged on Buffy's side, and the owner hasn't confirmed Buffy's window there yet.

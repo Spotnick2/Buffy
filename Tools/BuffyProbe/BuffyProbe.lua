@@ -156,7 +156,7 @@ Probe:Command("clear", function() Probe:ClearLog(); say("log cleared") end, "emp
 -- ─── the procedure ──────────────────────────────────────────────────────────
 
 Probe:Steps("pin", {
-    rev = 2,                                   -- 2: a failing /buffy command fails its step
+    rev = 3,                                   -- 2: a failing /buffy command fails its step; 3: no Lua-error ask
     title = "Buffy on its library pin (#35)",
     { text = "Out of combat, on a Priest, Druid or Mage. Type /console scriptErrors 1 once, then press Next." },
     { text = "Reading the versions: client, Buffy, and the LibGroupBuffs and LibGlass copies running.",
@@ -167,9 +167,8 @@ Probe:Steps("pin", {
           return s.build, s.buffy, s.class, s.gb, s.glass
       end,
       check = function() return stateOK() end },
-    -- Asked so that Yes is the problem: "No Lua error?" answered No was ambiguous (rev 1, 2026-11-18).
-    { text = "Did a Lua error appear since login or /reload (Bugsy, BugSack or the error window)? "
-          .. "Yes = an error appeared; type it in the Note box.", ask = true },
+    -- No "any Lua error?" question: the session reads Bugsy's SavedVariables (!Bugsy.lua) after
+    -- the run, which is what Bugsy is for (rev 3; rev 1 asked, and its "No" was ambiguous).
     { text = "Run /buffy help. It prints in chat and ends with the spell list.", button = "Run /buffy help",
       screenshot = "buffy help",
       run = function() local ok = buffyCmd("help"); local r = spells(); return ok, r and r.unresolved, r and r.unknown end,

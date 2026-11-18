@@ -89,6 +89,23 @@ verified until they are run.
 On 2026-11-18, after v1.0.1, main moved to LibGlass r13 (`5b2c9ab`). The checks that run from
 then on run against r34 and r13, which is what the next release ships.
 
+## LibGroupBuffs r34 on LibGlass r13 (#35), 2026-11-18
+
+Run as BuffyProbe's guided procedure (`/fp steps bf pin`). The step-by-step results are in
+[FOREVER-PROBE.md](FOREVER-PROBE.md). Client 1.60.1.70959, enUS, on a Druid then a Mage. Every measured check passed:
+- the running minors (34 ready, LibGlass 13);
+- the spell report on both classes, with 0 unresolved and 0 unknown names;
+- preview on and off;
+- a click-cast that landed on its target.
+
+The owner confirmed every visual and behavioural step: the window, the 5 and 8 previews, both growth directions, the
+tooltip and timer colours, close and minimize in combat, and a vendor visit. Bugsy logged no Lua
+error or blocked action. The battleground step was skipped.
+
+This covers some of the pending checks above only in part. The previews and growth were checked
+solo, on one class, without a full restart. The vendor visit was on a Druid without Gift of the
+Wild, so no restock purchase was due. Those scenarios stay open.
+
 ## GlassUI integration
 
 GlassUI PR #160, the hub roster entry, merged on 2026-10-24 UTC. GlassUI itself is not

@@ -47,6 +47,17 @@ worktrees above sit at the declared pins; any checkout at those pins will do, an
 reports whether each library matches its pin. tests/check_package.py checks a staged directory
 or zip, including dependency bytes and licenses. The normal runner syntax-checks the TOC
 and runs every tests/test_*.lua. Extend strict stubs only after checking the current API dump.
+
+The test scaffolding is WowTestKit (`C:\Projects\WoW\WowTestKit`; its README is the reference),
+at the commit and client build `tests\kit.pin` names. `tests\run.ps1` puts that commit in
+`%LOCALAPPDATA%\WowTestKit\<sha>` and hands off to the kit's runner; CI fetches it with
+`tests\fetch_kit.sh`. `tests\kit.lua`, `kit.ps1` and `fetch_kit.sh` are the kit's bootstrap
+copies: never edit them here. Buffy has no stub of its own: the mock is LibGroupBuffs' shared
+`tests/wow_stubs.lua` (r35 and later build it on the kit, from Buffy's `kit.pin`), and
+`tests/harness.lua` adds Buffy's globals. A kit need is an issue on WowTestKit, worked around in
+the harness with a `-- WowTestKit #N:` comment meanwhile. `tests\run.ps1 -KitDev` runs against the
+`..\WowTestKit` working copy instead of the pin. `tests/test_methods.lua` checks every widget method
+Buffy's frames call against the pinned build (`Kit.checkMethods`).
 For a library change, run its suite and Priestly/Wildly/Magely against the modified checkout.
 Document baseline failures without changing unrelated repositories.
 

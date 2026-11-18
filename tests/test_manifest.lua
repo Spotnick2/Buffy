@@ -1,4 +1,8 @@
 local H = dofile("tests/harness.lua")
+-- What every addon TOC must get right (WowTestKit): the interface, the packager's version
+-- token, each listed .lua file exists, nothing listed twice. The two library XML lines aren't
+-- .lua; their files are checked by tests/libfiles.lua and the packaging checks below.
+Kit.checkToc("Buffy.toc", { interface = 16001 })
 local toc = H.read("Buffy.toc")
 H.check(toc:find("## Interface: 16001", 1, true), "Forever interface")
 H.check(toc:find("## X-Curse-Project-ID: 1760483", 1, true), "CurseForge identity")

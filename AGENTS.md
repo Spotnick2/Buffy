@@ -78,5 +78,8 @@ README.curseforge.md changed, since the owner pastes it into CurseForge and Wago
 Remote creation, PRs, release tags, publishing, and game-folder deployment are separate actions.
 Do not deploy just to validate packaging; use a staging folder. Preserve original sibling work.
 Tools/deploy.ps1 targets the live `_forever_` client; pass `-AddOnsPath` for `_classic_beta_`.
+`-Probe` also deploys ForeverProbe and BuffyProbe (`/fp bf`), whose `/fp steps bf pin` is the
+in-game check of a library pin; see docs/FOREVER-PROBE.md. Its test (`tests/test_probe.lua`) runs
+locally only, as ForeverProbe is private: CI sets `FOREVERPROBE_OPTIONAL=1`.
 The approved plan is docs/PLAN.md. Finish the current milestone and report tests and remaining
 in-game acceptance before starting another milestone.

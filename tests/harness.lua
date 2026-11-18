@@ -1,4 +1,12 @@
-local H = { run = 0, failures = 0 }
+-- The assertions are WowTestKit's (check / eq / done, globals the kit defines),
+-- at the commit and build tests/kit.pin names. The kit is loaded here, so a
+-- test that never loads the addon (test_manifest) has them too; LibGroupBuffs'
+-- shared stub loads it again on every H.load, which the kit takes as
+-- Kit.freshClient(): a fresh mock client, the pass/fail counts kept.
+-- H.check / H.eq / H.done keep their names, so no test changes. The kit's
+-- print goes to WoW.chat, not the terminal: done() writes the result line.
+dofile("tests/kit.lua")
+local H = {}
 local library = os.getenv("LIBGROUPBUFFS") or "../LibGroupBuffs"
 local glass = os.getenv("LIBGLASS") or "../LibGlass"
 local function read(path)
@@ -6,11 +14,8 @@ local function read(path)
     local s = f:read("*a"):gsub("\r\n", "\n"); f:close(); return s
 end
 H.read = read
-function H.check(ok, msg)
-    H.run = H.run + 1
-    if not ok then H.failures = H.failures + 1; print("FAIL: " .. (msg or "assertion")) end
-end
-function H.eq(a, b, msg) H.check(a == b, (msg or "values") .. ": expected " .. tostring(b) .. ", got " .. tostring(a)) end
+function H.check(ok, msg) check(ok, msg or "assertion") end
+function H.eq(a, b, msg) eq(a, b, msg or "values") end
 function H.near(a, b, msg) H.check(type(a) == "number" and math.abs(a-b)<0.0001, msg) end
 local function xml(root, path)
     local dir = path:match("^(.*/)") or ""
@@ -47,8 +52,8 @@ function H.load(class, suite, beforeLogin)
     WoW.flushTimers()
     return Buffy
 end
-function H.done(name)
-    print(name .. ": " .. (H.run-H.failures) .. "/" .. H.run .. " passed")
-    if H.failures > 0 then os.exit(1) end
-end
+-- "<name>: N passed, M failed", after the kit's own two checks (no stray "|"
+-- in any printed line, no blocked operation on a secret swallowed by a pcall).
+-- Exits with the result.
+function H.done(name) done(name) end
 return H

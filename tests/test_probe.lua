@@ -65,11 +65,15 @@ H.check(ForeverProbe.procedures["BuffyProbe/pin"] ~= nil, "the pin procedure is 
 
 -- The player's casts: counted, named through Buffy's adapter (the global
 -- GetSpellInfo is gone on Forever), and another unit's cast ignored (Codex, #45).
+-- The probe registers with RegisterUnitEvent("...", "player"), which the kit
+-- models: WoW.fire delivers a unit event only to a frame registered for that
+-- unit, as the client does. (The shared stub's WoW.dispatch reads plain
+-- RegisterEvent registrations only.)
 local spellID = Buffy.class.defs[1].snglID
 local logBefore = #BuffyProbeDB.log
-WoW.dispatch("UNIT_SPELLCAST_SUCCEEDED", "party1", "Cast-1", spellID)
+WoW.fire("UNIT_SPELLCAST_SUCCEEDED", "party1", "Cast-1", spellID)
 H.eq((T.casts()), 0, "another unit's cast is not counted")
-WoW.dispatch("UNIT_SPELLCAST_SUCCEEDED", "player", "Cast-2", spellID)
+WoW.fire("UNIT_SPELLCAST_SUCCEEDED", "player", "Cast-2", spellID)
 local n, last = T.casts()
 H.eq(n, 1, "the player's cast is counted")
 H.eq(last and last.id, spellID, "cast spell id")

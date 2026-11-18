@@ -1,0 +1,5 @@
+# WowTestKit for these tests: the commit, and the client build to test against.
+# build=70959 is the newest client build (Buffy records no MEASURED_ON_BUILD); the kit has its data.
+sha=3cba24fd68e35758c19671bcedfefa9ad228c60f
+build=70959
+api=2

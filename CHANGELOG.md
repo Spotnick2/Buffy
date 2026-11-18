@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.0.2 - 2026-11-18
 
 - LibGlass r13 (was r11). Buffy's window draws its glass with it. Nothing is meant to look
   different.
@@ -9,6 +9,9 @@
   those clients). English and Russian clients keep the same font.
 - `/buffy help` and the `/buffy test` usage line print their `|` separators correctly. A bare `|`
   started an escape sequence in chat, which could garble the line.
+- The window, the previews, growth, the reagent footer and combat behaviour were checked on the
+  live client with LibGroupBuffs r34 and LibGlass r13, and the window's text with r36.
+  Battleground Shadow Protection and vendor restocking are still being checked in game.
 
 ## v1.0.1 - 2026-11-04
 

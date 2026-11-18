@@ -48,9 +48,13 @@ Disable the matching original addon when using Buffy to avoid duplicate buff win
 
 ## Good to know
 
-- The features added in 1.0 (battleground Shadow Protection, window growth, the preview, the
-  footer option and vendor restocking) have passed offline tests but are still being checked on
-  the live client. Please report anything that misbehaves.
+- Checked on the live client (a Druid and a Mage): the window, the 5- and 8-group preview, both
+  growth directions, the reagent footer, and closing and minimizing in combat. Battleground Shadow
+  Protection and vendor restocking have passed offline tests but are still being checked in game.
+  Please report anything that misbehaves.
+- The window's text uses the font your client's language uses. Korean and Chinese clients should
+  now see names instead of empty boxes (not yet checked on those clients). English and Russian
+  clients see no change.
 - A `?` beside a member's class icon means the spell's range is unknown. A `?` instead of a
   timer means Buffy can't read that aura right now and has no earlier reading to count down from.
 - Hunter and warlock pets don't count for Fortitude, Mark of the Wild or Arcane Intellect, and

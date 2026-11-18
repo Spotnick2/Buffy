@@ -262,7 +262,7 @@ SlashCmdList.BUFFY = function(message)
         local arg = cmd:match("^test%s*(%S*)")
         if arg == "off" or (arg == "" and B.previewActive) then EndPreview()
         elseif arg == "" or arg == "5" or arg == "8" then StartPreview(tonumber(arg) or 5)
-        else B.Say("Use /buffy test [5|8|off].") end
+        else B.Say("Use /buffy test [5||8||off].") end
         return
     end
     if B.previewActive then
@@ -281,7 +281,7 @@ SlashCmdList.BUFFY = function(message)
             tostring(pos.x), tostring(pos.y)) or "No saved position.")
         B.Say("Last restore: " .. tostring(ui:RestoreInfo().log) .. "; locked: " .. tostring(B.Get("lockFrame")))
     elseif cmd == "help" then
-        B.Say("/buffy [toggle|show|hide|config|reset|pos|test|help]")
+        B.Say("/buffy [toggle||show||hide||config||reset||pos||test||help]")
         B.Say("Left-click: group buff when learned, otherwise single. Right-click: single buff. Hover: member list.")
         B.Say("Timer: green >50%, yellow 10-50%, red <10%.")
         B.Say("? beside the class icon: spell range unknown. ? instead of a timer: buff state unreadable, with no cached reading.")

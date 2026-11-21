@@ -246,7 +246,11 @@ jobs:
             # Without -s, jq -e answers for the last document only, so a file
             # holding two (a repair that appended one) would pass, and WowUp
             # can't parse it (Codex, #61). Invalid JSON fails the test too.
-            if jq -es --slurpfile want gh/release.json 'length == 1 and . == $want' gh/stored.json > /dev/null; then
+            # jq is lenient, though: it reads 016001 as 16001 and skips a BOM.
+            # So the file must first pass JSON.parse, the strict parser WowUp
+            # reads it with (Codex, wow-dev-tools #71).
+            if node -e 'JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"))' gh/stored.json 2> /dev/null &&
+               jq -es --slurpfile want gh/release.json 'length == 1 and . == $want' gh/stored.json > /dev/null; then
               echo "keeping the release.json an earlier run uploaded: it is this one"
             elif [ "$(gh release view "$TAG" "${repo[@]}" --json isDraft --jq .isDraft)" = true ]; then
               echo "replacing the draft's release.json"

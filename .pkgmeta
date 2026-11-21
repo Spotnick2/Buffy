@@ -20,7 +20,7 @@ externals:
     tag: r13
   Libs/LibGroupBuffs-1.0:
     url: https://github.com/Spotnick2/LibGroupBuffs
-    commit: 2280486a2a5fbc475a656716c3b0a89f5fca7ef2
+    commit: ea558316bd8c9075204a95d4f3a1e54f9a539733
 
 manual-changelog:
   filename: CHANGELOG.md

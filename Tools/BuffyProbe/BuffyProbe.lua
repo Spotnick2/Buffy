@@ -548,6 +548,21 @@ local function slotRecord()
     return c and slot and c.records[tostring(slot.key)], slot
 end
 
+-- B's canonical name: the one roster member who is not A. The procedure is a
+-- two-person raid, so anything else is nil, and every wait compares names
+-- exactly (a prefix would take "Ari Oakes" for "Ari Oak"). Read from the
+-- roster each time, so it survives the /reload in the middle.
+local function peerB()
+    local c = assignClient()
+    if not c or not c.roster then return nil end
+    local other, n = nil, 0
+    for name in pairs(c.roster) do
+        n = n + 1
+        if name ~= c.me then other = name end
+    end
+    if n == 2 then return other end
+end
+
 local function peerDigestsMatch()
     local c = assignClient()
     if not c then return false end
@@ -567,7 +582,7 @@ local armedVer
 Probe:Command("assign", function() assignState() end, "raid assignments: group, peers, records, send results")
 
 Probe:Steps("assign", {
-    rev = 2,
+    rev = 3,
     title = "Raid assignments between two clients (#64)",
     { text = "Two clients, both with this deploy, on characters of the SAME class (two priests is best: it "
           .. "covers Fear Ward too). Run this on client A; client B only needs Buffy. Invite B, convert the "
@@ -575,8 +590,12 @@ Probe:Steps("assign", {
     { text = "Waiting for B's hello on the raid channel.", timeout = 180,
       wait = function()
           local s = assignState("hello")
-          if s and s.peers >= 1 and s.channel == "RAID" then return true, s.peers, s.channel, s.results end
+          local b = peerB()
+          if s and b and s.channel == "RAID" and assignClient().peers[b] then
+              return true, b, s.channel, s.results
+          end
           return false, "peers " .. show(s and s.peers) .. " on " .. show(s and s.channel)
+              .. (b and "" or " (the raid must be exactly A and B)")
       end },
     { text = "On A, open the panel and assign your class's first buff (the top line) to B's character.",
       button = "/buffy assign", run = function() return buffyCmd("assign") end },
@@ -584,7 +603,7 @@ Probe:Steps("assign", {
       wait = function()
           local rec = slotRecord()
           local c = assignClient()
-          if rec and rec.value ~= "" and c and rec.value:find(c.me, 1, true) == nil then
+          if rec and c and rec.value == peerB() and rec.writer == c.me then
               assignState("assigned")
               return true, rec.value, rec.ver
           end
@@ -596,7 +615,7 @@ Probe:Steps("assign", {
       wait = function()
           local rec = slotRecord()
           local c = assignClient()
-          if rec and rec.value == "" and rec.writer ~= (c and c.me) then return true, rec.writer, rec.ver end
+          if rec and rec.value == "" and rec.writer == peerB() then return true, rec.writer, rec.ver end
           return false, "not cleared by B yet"
       end },
     { text = "Now /reload A (press Reload now). The procedure comes back after it.", reload = true },
@@ -619,7 +638,7 @@ Probe:Steps("assign", {
       wait = function()
           local rec = slotRecord()
           local c = assignClient()
-          if rec and c and rec.value:find(c.me, 1, true) == 1 then return true, rec.ver end
+          if rec and c and rec.value == c.me and rec.writer == c.me then return true, rec.ver end
           return false, "not assigned to A yet"
       end },
     { text = "On B: does B's panel now name A? (B's window should have lost the row.)", ask = true },
@@ -627,7 +646,8 @@ Probe:Steps("assign", {
       wait = function()
           local rec = slotRecord()
           local c = assignClient()
-          if combatState() and rec and c and rec.value:find(c.me, 1, true) == nil and rec.value ~= "" then
+          local b = peerB()
+          if combatState() and rec and b and rec.value == b and rec.writer == b then
               local s = assignState("edit received in combat")
               return true, rec.value, s and s.lockdown, s and s.restrictions
           end
@@ -647,7 +667,7 @@ Probe:Steps("assign", {
           local def
           for _, d in ipairs((B and B.class and B.class.defs) or {}) do if d.id == "fearward" then def = d end end
           local names = def and B.assign and B.assign:TargetNames(def)
-          if names then return true end
+          if names and names[peerB() or false] then return true end
           return false, "no Fear Ward targets for A yet"
       end },
     { text = "Does A's window show a Fear Ward row for B's character?", ask = true, screenshot = "fear ward row" },
@@ -663,8 +683,8 @@ Probe:Steps("assign", {
       timeout = 300,
       wait = function()
           local rec, c = slotRecord(), assignClient()
-          if rec and c and armedVer and rec.ver > armedVer and rec.writer ~= c.me
-              and rec.value:find(c.me, 1, true) == 1 then
+          if rec and c and armedVer and rec.ver > armedVer and rec.writer == peerB()
+              and rec.value == c.me then
               local s = assignState("raid instance, edit from B")
               return true, rec.writer, rec.ver, s and s.results, s and s.lockdown, s and s.restrictions
           end
@@ -697,4 +717,4 @@ NS._test = { Probe = Probe, state = state, stateOK = stateOK, spells = spells, s
              casts = function() return casts, lastCast end, walkTraits = walkTraits, ownTraits = ownTraits,
              castSince = castSince, requestInspect = requestInspect,
              inspectState = function() return inspectWant, inspectGot end,
-             assignState = assignState, mySlot = mySlot }
+             assignState = assignState, mySlot = mySlot, peerB = peerB }

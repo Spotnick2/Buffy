@@ -108,7 +108,7 @@ second-class steps were skipped.
 | Growth | Skipped |
 | Click-cast | One cast counted after a click on Buffy's window: spell 1461, Arcane Intellect. It landed on the member clicked (yes) |
 | Tooltip and timer colours | Right (yes). The `/fp shot` screenshot shows the Arcane Intellect tooltip with the member's 59:28 in green |
-| Combat, battleground, vendor | Skipped |
+| Combat, battleground, vendor | Skipped (the battleground was skipped on 70959 too) |
 | Second class | Skipped. Step 24 read the Mage again, so its "another class" check failed by design; the spell report itself was clean (0 unresolved, 0 unknown) |
 
 What this shows: Buffy on its pins loads and runs on 71037, its spell names resolve, and its window,

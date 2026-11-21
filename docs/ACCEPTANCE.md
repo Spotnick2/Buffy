@@ -114,8 +114,9 @@ A partial `/fp steps bf pin` on client 1.60.1.71037, enUS, on a Mage. The result
 click-cast (Arcane Intellect) landed on its target. The owner confirmed the window, the 5 and 8 previews and
 the tooltip colours. Bugsy logged no Lua error or blocked action.
 
-Growth, combat, the battleground, the vendor and a second class were skipped on this build; they
-passed on 70959 above. `measuredOnBuild` moved to 71037 on this check.
+Growth, combat, the vendor and a second class were skipped on this build; they passed on 70959
+above. The battleground `?` marks were skipped on both builds and are still to check.
+`measuredOnBuild` moved to 71037 on this check.
 
 ## GlassUI integration
 

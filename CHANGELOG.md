@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+
+- Raid buff assignments: `/buffy assign` opens a panel listing who casts each raid buff.
+  - Priests: Prayer of Fortitude, Spirit and Shadow Protection.
+  - Druids: Gift of the Wild.
+  - Mages: Arcane Brilliance, and one mage for Amplify *or* Dampen Magic.
+  - It also covers who a druid keeps Thorns on and who a priest keeps Fear Ward on.
+- Anyone in the group can change any assignment, and the last change wins. Assignments are shared
+  with every Buffy, Priestly, Wildly and Magely user in the group, once those addons update to
+  LibGroupBuffs r37.
+- A buff assigned to somebody else leaves your window. One assigned to you shows even if you
+  turned it off. Unassigned buffs behave as before.
+- New Priest row: Fear Ward (every race on Forever). It appears only while you have Fear Ward
+  targets assigned.
+- Needs LibGroupBuffs r37. Not yet checked in game.
+
 ## v1.0.2 - 2026-11-18
 
 - LibGlass r13 (was r11). Buffy's window draws its glass with it. Nothing is meant to look

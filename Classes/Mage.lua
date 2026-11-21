@@ -14,6 +14,7 @@ local DEFS = {
         grp         = "Arcane Brilliance",
         fallbackIcon= "Interface\\Icons\\Spell_Holy_MagicalSentry",
         duration    = 3600,
+        assign      = "owner",    -- raid assignment (LibGroupBuffs r37)
     },
     {
         id          = "amplify",
@@ -21,6 +22,7 @@ local DEFS = {
         sngl        = "Amplify Magic",
         fallbackIcon= "Interface\\Icons\\Spell_Holy_FlashHeal",
         duration    = 600,
+        assign      = "owner",    -- one Magic slot: a mage plus Amplify or Dampen
     },
     {
         id          = "dampen",
@@ -28,6 +30,8 @@ local DEFS = {
         sngl        = "Dampen Magic",
         fallbackIcon= "Interface\\Icons\\Spell_Nature_AbolishMagic",
         duration    = 600,
+        assign      = "owner",
+        assignSlot  = 1008,       -- shares Amplify's slot
     },
 }
 local DEFAULTS = {
@@ -100,7 +104,7 @@ end
 
 local function FooterItems()
     local items = {}
-    if B.IsBuffEnabled and not B.IsBuffEnabled("intellect") then return items end
+    if B.KeepsBuff and not B.KeepsBuff("intellect") then return items end
     if INTELLECT.hasGroup then
         items[#items + 1] = {
             itemID = ARCANE_POWDER, icon = ItemIcon(ARCANE_POWDER), usedBy = INTELLECT.grp,
@@ -134,7 +138,7 @@ C.restock = {
     enabledKey = "autoBuyPowder", targetKey = "powderTarget",
     label = "Buy Arcane Powder at vendors", targetLabel = "Arcane Powder target",
     items = function()
-        if B.IsBuffEnabled("intellect") and INTELLECT.hasGroup then return { ARCANE_POWDER } end
+        if B.KeepsBuff("intellect") and INTELLECT.hasGroup then return { ARCANE_POWDER } end
         return {}
     end,
     names = { [ARCANE_POWDER] = "Arcane Powder" },

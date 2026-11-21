@@ -17,9 +17,11 @@ local P = dofile("tests/pkgmeta.lua")
 local external = assert(P.externals())
 H.eq(external["Libs/LibGlass-1.0"].ref, "r13", "glass immutable release pin")
 local pin = external["Libs/LibGroupBuffs-1.0"]
+-- The assignments pilot (#64) runs on LibGroupBuffs' PR commit until r37 is
+-- tagged; these two fail until the pin is `tag: r37`, so it cannot merge first.
 H.eq(pin.kind, "tag", "library pinned to a release tag")
-H.eq(pin.ref, "r36", "library pinned to tested source (r36 = 5bae625)")
-H.check(H.read("BuffyCompat.lua"):find("NEEDS_MINOR = 33", 1, true), "growth and preview API floor")
+H.eq(pin.ref, "r37", "library pinned to tested source (r37, the raid assignments)")
+H.check(H.read("BuffyCompat.lua"):find("NEEDS_MINOR = 37", 1, true), "assignments API floor")
 local logo = assert(io.open("Media/Logo.tga", "rb"))
 local header = logo:read(18); logo:close()
 H.eq(header:byte(3), 2, "uncompressed TGA")

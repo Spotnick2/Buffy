@@ -118,6 +118,21 @@ Growth, combat, the vendor and a second class were skipped on this build; they p
 above. The battleground `?` marks were skipped on both builds and are still to check.
 `measuredOnBuild` moved to 71037 on this check.
 
+## Raid assignments on LibGroupBuffs r37 (#64), pending
+
+Nothing checked in game yet; the offline suites pass (LibGroupBuffs `test_assign.lua`, Buffy
+`test_assignments.lua`). `/fp steps bf assign` (two clients, [FOREVER-PROBE.md](FOREVER-PROBE.md))
+checks:
+- Assigning across the clients.
+- That a clear survives a `/reload`, and that an edit right after the reload wins.
+- An edit received in combat (the window changes at combat end). The panel is read-only in combat.
+- Menus, then a secure cast (taint).
+- A Fear Ward row.
+- The same inside a raid instance.
+
+It records the send result codes, the chat lockdown and the restriction states. Not covered:
+a boss fight, INSTANCE_CHAT, a 40-player raid.
+
 ## GlassUI integration
 
 GlassUI PR #160, the hub roster entry, merged on 2026-10-24 UTC. GlassUI itself is not

@@ -33,6 +33,23 @@ Checked offline, not in game: CurseForge's own zips of v1.0.0 (file 9431326) and
 pass `tests/check_package.py` (47 runtime files, library bytes at r34 and r11) and carry no
 `Libs/LibGroupBuffs-1.0/docs`, `tests` or `Tools` (2026-11-18).
 
+## `assign`: raid assignments between two clients (#64)
+
+Two clients with this deploy, on the same class (two priests also cover Fear Ward), in one raid.
+The procedure runs on client A; B only needs Buffy. It waits for B's hello on RAID, then goes
+through these steps:
+- Assign A's first slot to B, then clear it from B.
+- `/reload` A and wait for the digests to match: the clear must come back.
+- Assign the slot to A at once.
+- B edits while A is in combat (A's window waits for the end of combat, and its panel refuses edits).
+- Menus, then a secure cast.
+- B gives A Fear Ward targets.
+- Inside a raid instance, B assigns that slot to A, and A waits for that record (a newer version, written by B, naming A).
+
+`/fp bf assign` logs the client's state at each point: group, channel, peers, records, digest,
+queue, sends by result code, received and accepted messages, `InChatMessagingLockdown` and every
+non-zero `C_RestrictedActions` restriction state. Not run yet.
+
 ## `cd`: what a cooldown pane can read (#52)
 
 The pane (#52) would list the group's Innervate and Power Infusion providers. Magely's probe

@@ -177,4 +177,17 @@ local okWait, waitID = T.castSince(true)
 H.check(okWait and waitID == spellID, "a plain in-combat cast completes the combat wait")
 WoW.inCombat = false
 
+-- assign: B is the one roster name that isn't A's, compared exactly (#65
+-- review), and nil unless the raid is exactly the two of them.
+do
+    local c = LibStub("LibGroupBuffs-1.0").assign
+    local roster, me = c.roster, c.me
+    c.me = "Ari Oak"
+    c.roster = { ["Ari Oak"] = {}, ["Ari Oakes"] = {} }
+    H.eq(T.peerB(), "Ari Oakes", "B is the other member, not a prefix match")
+    c.roster["Cora Leaf"] = {}
+    H.eq(T.peerB(), nil, "no B in a raid of three")
+    c.roster, c.me = roster, me
+end
+
 H.done("probe")

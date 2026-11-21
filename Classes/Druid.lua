@@ -14,6 +14,7 @@ local DEFS = {
         grp         = "Gift of the Wild",
         fallbackIcon= "Interface\\Icons\\Spell_Nature_Regeneration",
         duration    = 1800,
+        assign      = "owner",    -- raid assignment (LibGroupBuffs r37)
     },
     {
         id          = "thorns",
@@ -21,6 +22,7 @@ local DEFS = {
         sngl        = "Thorns",
         fallbackIcon= "Interface\\Icons\\Spell_Nature_Thorns",
         duration    = 600,
+        assign      = "targets",  -- a list per druid, which replaces Thorns mode while set
     },
 }
 local DEFAULTS = {
@@ -170,7 +172,7 @@ end
 
 local function FooterItems()
     local items = {}
-    if B.IsBuffEnabled and not B.IsBuffEnabled("mark") then return items end
+    if B.KeepsBuff and not B.KeepsBuff("mark") then return items end
     local reagent = GIFT_REAGENTS[GetGiftRank()]
     if reagent then
         items[#items + 1] = {
@@ -191,7 +193,7 @@ C.restock = {
     enabledKey = "autoBuyGift", targetKey = "giftTarget",
     label = "Buy Gift of the Wild reagents at vendors", targetLabel = "Gift reagent target",
     items = function()
-        if not B.IsBuffEnabled("mark") or not MARK.hasGroup then return {} end
+        if not B.KeepsBuff("mark") or not MARK.hasGroup then return {} end
         local itemID = GIFT_REAGENTS[FindGiftRank()]
         return itemID and { itemID } or {}
     end,

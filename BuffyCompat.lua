@@ -26,7 +26,8 @@ Buffy = Buffy or {}
 -- lib:New arrived, and r28 where lib:Refusal says why it refused; this file
 -- is written against both. Keep this equal to the MINOR .pkgmeta pins;
 -- tests/test_manifest.lua checks the literal, so update both together.
-local NEEDS_MINOR = 33
+-- r37 is the raid assignments (GB.Assignments, the engine's assignments seam).
+local NEEDS_MINOR = 37
 
 -- Buffy's own record of the events this client rejected, for
 -- `/dump Buffy.eventFailures`. The library also keeps it, as

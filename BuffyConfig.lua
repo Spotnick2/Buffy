@@ -138,6 +138,19 @@ function B.IsBuffEnabled(id)
     return not key or B.Get(key) ~= false
 end
 
+-- Whether this character keeps a buff up, for its reagents: its own setting,
+-- or the raid assigned the buff to it (#64), which brings the row back whatever
+-- the setting says. A buff owned by somebody else keeps its reagents: the owner
+-- can leave the raid.
+function B.KeepsBuff(id)
+    if B.IsBuffEnabled(id) then return true end
+    if not B.assign or not B.class then return false end
+    for _, def in ipairs(B.class.defs) do
+        if def.id == id then return B.assign:IsMine(def) end
+    end
+    return false
+end
+
 function B.IsVisible(def, groups, ord)
     local key = B.class.modeKeys[def.id]
     if not key then return true end

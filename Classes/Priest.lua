@@ -14,6 +14,7 @@ local DEFS = {
         sngl        = "Power Word: Fortitude",
         fallbackIcon= "Interface\\Icons\\Spell_Holy_WordFortitude",
         duration    = 3600,
+        assign      = "owner",    -- raid assignment (LibGroupBuffs r37)
     },
     {
         id          = "spirit",
@@ -23,6 +24,7 @@ local DEFS = {
         sngl        = "Divine Spirit",
         fallbackIcon= "Interface\\Icons\\Spell_Holy_PrayerOfSpirit",
         duration    = 3600,
+        assign      = "owner",
     },
     {
         id          = "shadow",
@@ -33,6 +35,19 @@ local DEFS = {
         fallbackIcon= "Interface\\Icons\\Spell_Holy_PrayerOfShadowProtection",
         duration    = 600,
         visibility  = "shadow",   -- also gated by the Shadow Protection mode
+        assign      = "owner",
+    },
+    -- Fear Ward (6346) is a Holy spell for every race on Forever (SkillLineAbility
+    -- 70959: skill line 56, ClassMask 16, RaceMasks -1), not the Dwarf racial. It
+    -- has a row only while the raid has given this priest targets for it.
+    {
+        id          = "fearward",
+        snglID      = 6346,
+        sngl        = "Fear Ward",
+        fallbackIcon= "Interface\\Icons\\Spell_Holy_Excorcism",
+        duration    = 600,
+        assign      = "targets",
+        assignOnly  = true,
     },
 }
 local DEFAULTS = {
@@ -90,10 +105,10 @@ end
 local function CandleItems()
     local items = {}
     local fortRank = GetPrayerRank()
-    local trackFort = B.IsBuffEnabled("fort")
+    local trackFort = B.KeepsBuff("fort")
     if trackFort and fortRank == 1 then items[#items + 1] = HOLY_CANDLE_ID end
     if (trackFort and fortRank and fortRank > 1)
-        or (B.IsBuffEnabled("spirit") and (API.GetSpellRank(DEFS[2].grp) or 0) > 0)
+        or (B.KeepsBuff("spirit") and (API.GetSpellRank(DEFS[2].grp) or 0) > 0)
         or (API.GetSpellRank(DEFS[3].grp) or 0) > 0 then
         items[#items + 1] = SACRED_CANDLE_ID
     end

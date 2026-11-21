@@ -30,7 +30,16 @@ end
 local function RefreshSpells()
     B.engine:RefreshSpells()
     B.class.refresh()
+    -- What this character can cast goes out to the group (who can be assigned what).
+    B.assign:SpellsChanged()
     WarnSpells()
+end
+
+-- The raid's assignments changed what this window should show. Preview mode
+-- shows its own roster, and before login there is no window to change.
+local function AssignmentsChanged()
+    if not loggedIn or not B.visibility or B.previewActive then return end
+    B.visibility:ContentChanged()
 end
 
 function B.OnConfigChanged(key)
@@ -60,8 +69,10 @@ local function Initialize()
     if not B.class then return end
     B.InitConfig()
     B.StartAppearance()
+    -- Before the engine, which reads it; shared with the group by LibGroupBuffs.
+    B.assign = GB.Assignments({ onChanged = AssignmentsChanged })
     B.engine = GB.Engine({
-        defs = B.class.defs, bucketSize = 8,
+        defs = B.class.defs, bucketSize = 8, assignments = B.assign,
         showSolo = function() return B.Get("showSolo") == true end,
         trackPets = function() return B.Get("trackPets") ~= false end,
         isBuffEnabled = B.IsBuffEnabled, isVisible = B.IsVisible,
@@ -265,6 +276,8 @@ SlashCmdList.BUFFY = function(message)
         else B.Say("Use /buffy test [5||8||off].") end
         return
     end
+    -- The assignment panel is its own frame: it leaves test mode alone.
+    if cmd == "assign" or cmd == "assignments" then B.assign:Open(); return end
     if B.previewActive then
         EndPreview()
         if B.previewActive then return end
@@ -281,7 +294,9 @@ SlashCmdList.BUFFY = function(message)
             tostring(pos.x), tostring(pos.y)) or "No saved position.")
         B.Say("Last restore: " .. tostring(ui:RestoreInfo().log) .. "; locked: " .. tostring(B.Get("lockFrame")))
     elseif cmd == "help" then
-        B.Say("/buffy [toggle||show||hide||config||reset||pos||test||help]")
+        B.Say("/buffy [toggle||show||hide||config||reset||pos||test||assign||help]")
+        B.Say("/buffy assign: who casts each raid buff. Shared with the group's Buffy, Priestly, Wildly and Magely users; "
+            .. "a buff given to somebody else leaves your window.")
         B.Say("Left-click: group buff when learned, otherwise single. Right-click: single buff. Hover: member list.")
         B.Say("Timer: green >50%, yellow 10-50%, red <10%.")
         B.Say("? beside the class icon: spell range unknown. ? instead of a timer: buff state unreadable, with no cached reading.")

@@ -58,8 +58,8 @@ function B.InitConfig()
             { label = "class profile", get = B.Profile },
             { label = "per-character", get = Character },
         },
-        -- Inherited measurements, not a claim Buffy has been tested in game.
-        measuredOnBuild = "70338",
+        -- The build Buffy's pin check last passed on (docs/FOREVER-PROBE.md, pin rev 3).
+        measuredOnBuild = "71037",
         onChanged = function(key) if B.OnConfigChanged then B.OnConfigChanged(key) end end,
     })
     for k, v in pairs(B.class.defaults) do

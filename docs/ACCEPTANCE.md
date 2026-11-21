@@ -106,6 +106,17 @@ This covers some of the pending checks above only in part. The previews and grow
 solo, on one class, without a full restart. The vendor visit was on a Druid without Gift of the
 Wild, so no restock purchase was due. Those scenarios stay open.
 
+## LibGroupBuffs r36 on LibGlass r13, build 71037 (#58), 2026-11-21
+
+A partial `/fp steps bf pin` on client 1.60.1.71037, enUS, on a Mage. The results are in
+[FOREVER-PROBE.md](FOREVER-PROBE.md) (rev 3). Every measured check that ran passed: the running minors
+(36 ready, LibGlass 13), the spell report with 0 unresolved and 0 unknown, and preview on and off. A
+click-cast (Arcane Intellect) landed on its target. The owner confirmed the window, the 5 and 8 previews and
+the tooltip colours. Bugsy logged no Lua error or blocked action.
+
+Growth, combat, the battleground, the vendor and a second class were skipped on this build; they
+passed on 70959 above. `measuredOnBuild` moved to 71037 on this check.
+
 ## GlassUI integration
 
 GlassUI PR #160, the hub roster entry, merged on 2026-10-24 UTC. GlassUI itself is not

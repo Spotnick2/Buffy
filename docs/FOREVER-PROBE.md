@@ -89,3 +89,31 @@ The screenshots were looked at and then deleted with `screenshots.ps1 -Remove`.
 17:37 on account SPOTNICK2, and LibStub ran it for every window, Buffy's included. Bugsy (SPOTNICK2) holds
 0 problems for that session. Buffy's own check of r36 is #46, still open: the minor that ran isn't
 logged on Buffy's side, and the owner hasn't confirmed Buffy's window there yet.
+
+### `pin` rev 3: LibGroupBuffs r36 + LibGlass r13 on build 71037 (#58), 2026-11-21
+
+Client 1.60.1.71037 (enUS), Buffy `dev` from main after #61 (deployed with `.work/LibGroupBuffs-r36`
+and `.work/LibGlass-r13`, both identical to their tags, `5bae625` and `5b2c9ab`), account SPOTNICK3.
+Mage level 32 in Orgrimmar, ForeverProbe run #536, saved by the `/reload` of step 25 (#537). A
+partial run: the owner stopped once Buffy was shown working on the build, so the combat, vendor and
+second-class steps were skipped.
+
+| What | Result |
+|---|---|
+| Running copies | LibGroupBuffs minor 36, `ready` 36; LibGlass minor 13. Loaded alongside Priestly v2.1.1 and Wildly v1.1.1; Magely not loaded. CHECK PASS |
+| Lua errors and blocked actions | None. Bugsy (`!Bugsy.lua`, SPOTNICK3, session 222) holds no problem from sessions 221 or 222, and none of its 300 problems has Buffy, LibGroupBuffs, LibGlass or a probe on its stack. ForeverProbe's host log has no `ADDON_ACTION_BLOCKED` in #536 or #537 |
+| `/buffy help` and the spell report | Ran without error. Mage: 3 buffs, 4 names, 3 learned, 0 unresolved, 0 unknown, 0 unreadable ranks. CHECK PASS |
+| Window | Opened; moved, minimized and restored normally (yes, screenshot) |
+| Preview | `/buffy test 5` and `test 8` showed 5 and 8 groups (screenshots); rows, icons and timers as before (yes); `test off` returned to live data. CHECK PASS |
+| Growth | Skipped |
+| Click-cast | One cast counted after a click on Buffy's window: spell 1461, Arcane Intellect. It landed on the member clicked (yes) |
+| Tooltip and timer colours | Right (yes). The `/fp shot` screenshot shows the Arcane Intellect tooltip with the member's 59:28 in green |
+| Combat, battleground, vendor | Skipped |
+| Second class | Skipped. Step 24 read the Mage again, so its "another class" check failed by design; the spell report itself was clean (0 unresolved, 0 unknown) |
+
+What this shows: Buffy on its pins loads and runs on 71037, its spell names resolve, and its window,
+previews, click-casting and tooltip work, with no error or blocked action. It is the basis for
+`measuredOnBuild = "71037"`. It doesn't re-check combat, growth, the vendor or a second class on
+this build; those passed on 70959 (rev 1).
+
+The screenshots were looked at and then deleted with `screenshots.ps1 -Remove`.

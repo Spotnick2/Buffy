@@ -145,4 +145,59 @@ do
     H.eq(Rows(B, "amplify") + Rows(B, "dampen"), 0, "another mage's Magic slot hides both")
 end
 
+------------------------------------------------------------
+-- Reagents follow an assignment, not only the setting (#65 review)
+------------------------------------------------------------
+
+do
+    local B = H.load("MAGE")
+    WoW.Know(23028, "Arcane Brilliance")
+    WoW.dispatch("SPELLS_CHANGED")
+    WoW.flushTimers()
+    B.SetConfig("trackIntellect", false)
+    B.SetConfig("autoBuyPowder", true)
+    Party(B, { { name = "Nils Frost", class = "MAGE" } })
+    H.eq(#B.class.footerItems(), 0, "Intellect off and unassigned: no powder counter")
+    H.eq(#B.class.restock.items(), 0, "and no powder restock")
+    Record("1459", "Buffy Test", "Nils Frost")
+    WoW.flushTimers()
+    H.check(Rows(B, "intellect") > 0, "Brilliance assigned to me brings its row back")
+    H.eq(#B.class.footerItems(), 1, "and its powder counter")
+    H.eq(B.class.restock.items()[1], 17020, "and its powder restock")
+    WoW.merchantItems = { { itemID = 17020, price = 100, numAvailable = -1, stackCount = 1, isPurchasable = true } }
+    WoW.money = 100000
+    WoW.dispatch("MERCHANT_SHOW")
+    H.eq(WoW.purchases[1] and WoW.purchases[1].quantity, 80, "the vendor sells it powder")
+    Hello("Nils Frost", "MAGE", "1459,23028")
+    Record("1459", "Nils Frost", "Nils Frost")
+    WoW.flushTimers()
+    H.eq(#B.class.footerItems(), 0, "assigned elsewhere: back to the setting")
+end
+
+do
+    local B = H.load("PRIEST")
+    WoW.Know(21562, "Prayer of Fortitude", "Rank 2")
+    WoW.dispatch("SPELLS_CHANGED")
+    WoW.flushTimers()
+    B.SetConfig("trackFort", false)
+    Party(B, { { name = "Bren Holt", class = "PRIEST" } })
+    H.eq(#B.class.candleItems(), 0, "Fortitude off: no Sacred Candles")
+    Record("1243", "Buffy Test", "Bren Holt")
+    WoW.flushTimers()
+    H.eq(B.class.candleItems()[1], 17029, "Fortitude assigned to me: Sacred Candles")
+end
+
+do
+    local B = H.load("DRUID")
+    WoW.Know(21849, "Gift of the Wild", "Rank 1")
+    WoW.dispatch("SPELLS_CHANGED")
+    WoW.flushTimers()
+    B.SetConfig("trackMark", false)
+    Party(B, { { name = "Dps Person", class = "ROGUE" } })
+    H.eq(#B.class.restock.items(), 0, "Mark off: no Gift reagent")
+    Record("1126", "Buffy Test", "Dps Person")
+    WoW.flushTimers()
+    H.eq(B.class.restock.items()[1], 17021, "Gift assigned to me: Wild Berries")
+end
+
 H.done("assignments")

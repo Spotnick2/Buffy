@@ -504,7 +504,10 @@ local function assignState(label)
     for code, n in pairs((c.stats and c.stats.results) or {}) do results[#results + 1] = code .. "x" .. n end
     table.sort(results)
     local CI, RA = rawget(_G, "C_ChatInfo"), rawget(_G, "C_RestrictedActions")
-    local okL, lockdown = Probe:Try("InChatMessagingLockdown", CI and CI.InChatMessagingLockdown)
+    -- A plain false (chat unrestricted) is a result too: keep it, and say when the call failed.
+    local lockdown = "unavailable"
+    local okL, value = Probe:Try("InChatMessagingLockdown", CI and CI.InChatMessagingLockdown)
+    if okL then lockdown = value end
     local active = {}
     if RA and RA.GetAddOnRestrictionState then
         for i = 0, 5 do
@@ -516,7 +519,7 @@ local function assignState(label)
     local out = {
         group = c.group, channel = c.channel, me = c.me, peers = #peers, records = records, cleared = cleared,
         queued = queued, digest = lib("LibGroupBuffs-1.0").AssignImpl.Digest(c.records or {}),
-        lockdown = okL and lockdown or nil, results = table.concat(results, " "),
+        lockdown = lockdown, results = table.concat(results, " "),
         received = c.stats and c.stats.received, accepted = c.stats and c.stats.accepted,
         restrictions = #active > 0 and table.concat(active, " ") or "none", where = show(name) .. "/" .. show(kind),
         combat = combatState(),
@@ -557,12 +560,14 @@ local function peerDigestsMatch()
     return any
 end
 
-local acceptedAt
+-- The slot's record when Arm was pressed in the raid instance, so the wait
+-- counts only B's edit of that slot, not a hello or a repair.
+local armedVer
 
 Probe:Command("assign", function() assignState() end, "raid assignments: group, peers, records, send results")
 
 Probe:Steps("assign", {
-    rev = 1,
+    rev = 2,
     title = "Raid assignments between two clients (#64)",
     { text = "Two clients, both with this deploy, on characters of the SAME class (two priests is best: it "
           .. "covers Fear Ward too). Run this on client A; client B only needs Buffy. Invite B, convert the "
@@ -653,16 +658,17 @@ Probe:Steps("assign", {
           return false, "instance type " .. show(kind)
       end },
     { text = "Inside, press Arm on A.", button = "Arm",
-      run = function() local c = assignClient(); acceptedAt = c and c.stats and c.stats.accepted; return acceptedAt end },
-    { text = "Now, on B, change any assignment in B's panel.", timeout = 300,
+      run = function() local rec = slotRecord(); armedVer = rec and rec.ver or 0; return armedVer end },
+    { text = "Now, on B, assign that same buff (your class's first line) to A's character in B's panel.",
+      timeout = 300,
       wait = function()
-          local c = assignClient()
-          local now = c and c.stats and c.stats.accepted
-          if now and acceptedAt and now > acceptedAt then
+          local rec, c = slotRecord(), assignClient()
+          if rec and c and armedVer and rec.ver > armedVer and rec.writer ~= c.me
+              and rec.value:find(c.me, 1, true) == 1 then
               local s = assignState("raid instance, edit from B")
-              return true, s and s.results, s and s.lockdown, s and s.restrictions
+              return true, rec.writer, rec.ver, s and s.results, s and s.lockdown, s and s.restrictions
           end
-          return false, "nothing from B yet"
+          return false, "B's edit of that buff not here yet"
       end },
     { text = "Still inside: on A, change any assignment. On B: did it arrive (B's panel)?", ask = true },
     { text = "Reading the final state.", auto = true,

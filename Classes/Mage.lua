@@ -104,7 +104,7 @@ end
 
 local function FooterItems()
     local items = {}
-    if B.IsBuffEnabled and not B.IsBuffEnabled("intellect") then return items end
+    if B.KeepsBuff and not B.KeepsBuff("intellect") then return items end
     if INTELLECT.hasGroup then
         items[#items + 1] = {
             itemID = ARCANE_POWDER, icon = ItemIcon(ARCANE_POWDER), usedBy = INTELLECT.grp,
@@ -138,7 +138,7 @@ C.restock = {
     enabledKey = "autoBuyPowder", targetKey = "powderTarget",
     label = "Buy Arcane Powder at vendors", targetLabel = "Arcane Powder target",
     items = function()
-        if B.IsBuffEnabled("intellect") and INTELLECT.hasGroup then return { ARCANE_POWDER } end
+        if B.KeepsBuff("intellect") and INTELLECT.hasGroup then return { ARCANE_POWDER } end
         return {}
     end,
     names = { [ARCANE_POWDER] = "Arcane Powder" },

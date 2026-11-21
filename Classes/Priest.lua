@@ -105,10 +105,10 @@ end
 local function CandleItems()
     local items = {}
     local fortRank = GetPrayerRank()
-    local trackFort = B.IsBuffEnabled("fort")
+    local trackFort = B.KeepsBuff("fort")
     if trackFort and fortRank == 1 then items[#items + 1] = HOLY_CANDLE_ID end
     if (trackFort and fortRank and fortRank > 1)
-        or (B.IsBuffEnabled("spirit") and (API.GetSpellRank(DEFS[2].grp) or 0) > 0)
+        or (B.KeepsBuff("spirit") and (API.GetSpellRank(DEFS[2].grp) or 0) > 0)
         or (API.GetSpellRank(DEFS[3].grp) or 0) > 0 then
         items[#items + 1] = SACRED_CANDLE_ID
     end

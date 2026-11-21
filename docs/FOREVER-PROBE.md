@@ -44,7 +44,7 @@ through these steps:
 - B edits while A is in combat (A's window waits for the end of combat, and its panel refuses edits).
 - Menus, then a secure cast.
 - B gives A Fear Ward targets.
-- The same edits inside a raid instance.
+- Inside a raid instance, B assigns that slot to A, and A waits for that record (a newer version, written by B, naming A).
 
 `/fp bf assign` logs the client's state at each point: group, channel, peers, records, digest,
 queue, sends by result code, received and accepted messages, `InChatMessagingLockdown` and every

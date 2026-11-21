@@ -242,7 +242,11 @@ jobs:
           if gh release view "$TAG" "${repo[@]}" --json assets \
                --jq '.assets[] | select(.state == "uploaded") | .name' | grep -qx 'release\.json'; then
             gh release download "$TAG" "${repo[@]}" -p release.json -O gh/stored.json --clobber
-            if jq -e --slurpfile want gh/release.json '. == $want[0]' gh/stored.json > /dev/null; then
+            # The whole file, slurped: one JSON document equal to this run's.
+            # Without -s, jq -e answers for the last document only, so a file
+            # holding two (a repair that appended one) would pass, and WowUp
+            # can't parse it (Codex, #61). Invalid JSON fails the test too.
+            if jq -es --slurpfile want gh/release.json 'length == 1 and . == $want' gh/stored.json > /dev/null; then
               echo "keeping the release.json an earlier run uploaded: it is this one"
             elif [ "$(gh release view "$TAG" "${repo[@]}" --json isDraft --jq .isDraft)" = true ]; then
               echo "replacing the draft's release.json"

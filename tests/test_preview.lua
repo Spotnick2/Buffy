@@ -2,6 +2,9 @@ local H = dofile("tests/harness.lua")
 for _, class in ipairs({ "PRIEST", "DRUID", "MAGE" }) do
     local B = H.load(class)
     if class == "MAGE" then SlashCmdList.BUFFY("hide") end
+    -- Every buff except those that exist only when assigned (Fear Ward).
+    local previewed = 0
+    for _, def in ipairs(B.class.defs) do if not def.assignOnly then previewed = previewed + 1 end end
     local oldPreference = B.WindowState("visible")
     SlashCmdList.BUFFY("test 5")
     H.check(B.previewActive and B.ui:IsPreview(), class .. " enters test mode")
@@ -13,12 +16,12 @@ for _, class in ipairs({ "PRIEST", "DRUID", "MAGE" }) do
         if row._active then shown = shown + 1 end
         H.eq(row:GetAttribute("type1"), nil, class .. " preview cannot cast")
     end
-    H.eq(shown, 5 * #B.class.defs, class .. " five groups show every buff")
+    H.eq(shown, 5 * previewed, class .. " five groups show every buff")
     H.check(#B.ui.footerItems > 0, class .. " preview includes a reagent footer")
     SlashCmdList.BUFFY("test 8")
     shown = 0
     for _, row in ipairs(B.ui.rows) do if row._active then shown = shown + 1 end end
-    H.eq(shown, 8 * #B.class.defs, class .. " eight groups shown")
+    H.eq(shown, 8 * previewed, class .. " eight groups shown")
     WoW.inCombat = true
     SlashCmdList.BUFFY("test off")
     H.check(B.previewExitPending and B.ui:IsPreview(), class .. " exit deferred in combat")

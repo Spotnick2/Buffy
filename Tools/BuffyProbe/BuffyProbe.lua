@@ -6,9 +6,13 @@
 --   /fp bf talents        your talents through the traits system (#52)
 --   /fp steps bf cd       what a cooldown pane can read (#52): our own instant casts' spell id in
 --                         and out of combat, and the traits tree, ours and an inspected player's
+--   /fp bf assign         raid assignments (#64): group, channel, peers, records, send results,
+--                         chat lockdown and restriction states
+--   /fp steps bf assign   the two-client check of raid assignments (#64): raid, reload, combat, a raid
+--                         instance
 --
 -- Read-only towards Buffy, apart from the /buffy commands a step runs on the owner's click
--- (help, show, test 5|8|off): the same commands the owner would type. It never touches
+-- (help, show, test 5|8|off, assign): the same commands the owner would type. It never touches
 -- Buffy's saved settings.
 
 local ADDON, NS = ...
@@ -16,7 +20,7 @@ local MAX_LOG = 3000
 
 -- What this deploy is meant to run. A newer copy loaded by another addon wins through
 -- LibStub, so the checks are "at least".
-local EXPECT = { gb = 34, glass = 13 }
+local EXPECT = { gb = 37, glass = 13 }
 local HOSTS = { "Priestly", "Wildly", "Magely" }
 
 local Probe = ForeverProbe:Module("BuffyProbe", { api = 1, cmd = "bf" })
@@ -472,6 +476,203 @@ Probe:Steps("cd", {
     { text = "Type /reload (or press Reload now) to save the results.", reload = true },
 })
 
+-- ─── #64: raid assignments between two clients ──────────────────────────────
+-- What the transport does where nothing is measured yet: a raid group, a raid instance, combat.
+-- Reads LibGroupBuffs' client state (lib.assign) and the client's own lockdown and restriction
+-- flags. Every edit is the owner's, through Buffy's panel, on either client.
+
+local RESTRICTIONS = { [0] = "Combat", "Encounter", "ChallengeMode", "PvPMatch", "Map", "Chat" }
+
+local function assignClient()
+    local gb = lib("LibGroupBuffs-1.0")
+    return gb and rawget(gb, "assign")
+end
+
+local function assignState(label)
+    local c = assignClient()
+    if not c then say("assign: no LibGroupBuffs client (a library below r37?)"); return nil end
+    local peers, records, cleared = {}, 0, 0
+    for name in pairs(c.peers or {}) do peers[#peers + 1] = name end
+    table.sort(peers)
+    for _, r in pairs(c.records or {}) do
+        records = records + 1
+        if r.value == "" then cleared = cleared + 1 end
+    end
+    local queued = 0
+    for _ in pairs(c.queue or {}) do queued = queued + 1 end
+    local results = {}
+    for code, n in pairs((c.stats and c.stats.results) or {}) do results[#results + 1] = code .. "x" .. n end
+    table.sort(results)
+    local CI, RA = rawget(_G, "C_ChatInfo"), rawget(_G, "C_RestrictedActions")
+    local okL, lockdown = Probe:Try("InChatMessagingLockdown", CI and CI.InChatMessagingLockdown)
+    local active = {}
+    if RA and RA.GetAddOnRestrictionState then
+        for i = 0, 5 do
+            local ok, st = Probe:Try("restriction " .. RESTRICTIONS[i], RA.GetAddOnRestrictionState, i)
+            if ok and st ~= 0 then active[#active + 1] = RESTRICTIONS[i] .. "=" .. show(st) end
+        end
+    end
+    local name, kind = GetInstanceInfo()
+    local out = {
+        group = c.group, channel = c.channel, me = c.me, peers = #peers, records = records, cleared = cleared,
+        queued = queued, digest = lib("LibGroupBuffs-1.0").AssignImpl.Digest(c.records or {}),
+        lockdown = okL and lockdown or nil, results = table.concat(results, " "),
+        received = c.stats and c.stats.received, accepted = c.stats and c.stats.accepted,
+        restrictions = #active > 0 and table.concat(active, " ") or "none", where = show(name) .. "/" .. show(kind),
+        combat = combatState(),
+    }
+    say("assign" .. (label and (" [" .. label .. "]") or "") .. ": group " .. show(out.group) .. " on "
+        .. show(out.channel) .. " as " .. show(out.me) .. ", peers " .. out.peers .. " (" .. table.concat(peers, ", ")
+        .. "), records " .. records .. " (" .. cleared .. " cleared), queued " .. queued .. ", digest "
+        .. show(out.digest))
+    say("  sends by result " .. (out.results ~= "" and out.results or "none") .. ", received " .. show(out.received)
+        .. ", accepted " .. show(out.accepted) .. ", chat lockdown " .. show(out.lockdown) .. ", restrictions "
+        .. out.restrictions .. ", in " .. out.where .. ", combat " .. show(out.combat))
+    return out
+end
+
+-- The first owner slot of this character's class, for the procedure to edit.
+local function mySlot()
+    local gb = lib("LibGroupBuffs-1.0")
+    local B = buffy()
+    for _, slot in ipairs((gb and gb.ASSIGN_SLOTS) or {}) do
+        if B and slot.class == B.classToken and slot.kind == "owner" then return slot end
+    end
+end
+
+local function slotRecord()
+    local c, slot = assignClient(), mySlot()
+    return c and slot and c.records[tostring(slot.key)], slot
+end
+
+local function peerDigestsMatch()
+    local c = assignClient()
+    if not c then return false end
+    local mine = lib("LibGroupBuffs-1.0").AssignImpl.Digest(c.records)
+    local any = false
+    for _, p in pairs(c.peers) do
+        any = true
+        if p.digest ~= mine then return false end
+    end
+    return any
+end
+
+local acceptedAt
+
+Probe:Command("assign", function() assignState() end, "raid assignments: group, peers, records, send results")
+
+Probe:Steps("assign", {
+    rev = 1,
+    title = "Raid assignments between two clients (#64)",
+    { text = "Two clients, both with this deploy, on characters of the SAME class (two priests is best: it "
+          .. "covers Fear Ward too). Run this on client A; client B only needs Buffy. Invite B, convert the "
+          .. "party to a raid, stay out of combat, then press Next." },
+    { text = "Waiting for B's hello on the raid channel.", timeout = 180,
+      wait = function()
+          local s = assignState("hello")
+          if s and s.peers >= 1 and s.channel == "RAID" then return true, s.peers, s.channel, s.results end
+          return false, "peers " .. show(s and s.peers) .. " on " .. show(s and s.channel)
+      end },
+    { text = "On A, open the panel and assign your class's first buff (the top line) to B's character.",
+      button = "/buffy assign", run = function() return buffyCmd("assign") end },
+    { text = "Waiting for that assignment.", timeout = 180,
+      wait = function()
+          local rec = slotRecord()
+          local c = assignClient()
+          if rec and rec.value ~= "" and c and rec.value:find(c.me, 1, true) == nil then
+              assignState("assigned")
+              return true, rec.value, rec.ver
+          end
+          return false, "no assignment to somebody else yet"
+      end, screenshot = "A after assigning B" },
+    { text = "Look at B's screen: does B's panel name B for that buff, B's window still show its row, "
+          .. "and A's window no longer show it?", ask = true, screenshot = "A's window" },
+    { text = "On B, set that buff to Nobody in B's panel (B's own /buffy assign).", timeout = 180,
+      wait = function()
+          local rec = slotRecord()
+          local c = assignClient()
+          if rec and rec.value == "" and rec.writer ~= (c and c.me) then return true, rec.writer, rec.ver end
+          return false, "not cleared by B yet"
+      end },
+    { text = "Now /reload A (press Reload now). The procedure comes back after it.", reload = true },
+    { text = "Waiting for A to get the state back from B after the reload.", timeout = 120,
+      wait = function()
+          local rec = slotRecord()
+          if rec and peerDigestsMatch() then
+              local s = assignState("after reload")
+              return rec.value == "", rec.value, s and s.digest
+          end
+          return false, "not synced yet"
+      end,
+      check = function()
+          local rec = slotRecord()
+          return rec ~= nil and rec.value == "", "the cleared record came back " .. show(rec and rec.value)
+      end },
+    { text = "Straight away, on A, assign that buff to A's own character in the panel.",
+      button = "/buffy assign", run = function() return buffyCmd("assign") end },
+    { text = "Waiting for A's edit.", timeout = 120,
+      wait = function()
+          local rec = slotRecord()
+          local c = assignClient()
+          if rec and c and rec.value:find(c.me, 1, true) == 1 then return true, rec.ver end
+          return false, "not assigned to A yet"
+      end },
+    { text = "On B: does B's panel now name A? (B's window should have lost the row.)", ask = true },
+    { text = "On A, enter combat (a training dummy). Then, on B, assign that buff to B.", timeout = 600,
+      wait = function()
+          local rec = slotRecord()
+          local c = assignClient()
+          if combatState() and rec and c and rec.value:find(c.me, 1, true) == nil and rec.value ~= "" then
+              local s = assignState("edit received in combat")
+              return true, rec.value, s and s.lockdown, s and s.restrictions
+          end
+          return false, combatState() and "in combat, waiting for B's edit" or "not in combat yet"
+      end },
+    { text = "Still in combat on A: click a line in A's panel. Does the panel say edits wait for the end of "
+          .. "combat, and A's buff window stay as it was?", ask = true, screenshot = "A in combat" },
+    { text = "Leave combat on A.", timeout = 600,
+      wait = function() if not combatState() then return true end; return false, "still in combat" end },
+    { text = "Out of combat: did A's window drop that buff's row now?", ask = true, screenshot = "A after combat" },
+    { text = "On A, use the panel's menus once more (open one, pick something), then cast a buff from Buffy's "
+          .. "window. Did the cast work, with no blocked-action message?", ask = true },
+    { text = "Fear Ward (priests only; press Skip otherwise): on B, give A's Fear Ward line B's character "
+          .. "in the checklist, then Apply.", timeout = 300,
+      wait = function()
+          local B = buffy()
+          local def
+          for _, d in ipairs((B and B.class and B.class.defs) or {}) do if d.id == "fearward" then def = d end end
+          local names = def and B.assign and B.assign:TargetNames(def)
+          if names then return true end
+          return false, "no Fear Ward targets for A yet"
+      end },
+    { text = "Does A's window show a Fear Ward row for B's character?", ask = true, screenshot = "fear ward row" },
+    { text = "Both clients: zone into a raid instance (any) and stay together.", timeout = 900,
+      wait = function()
+          local _, kind = GetInstanceInfo()
+          if kind == "raid" then assignState("raid instance"); return true, kind end
+          return false, "instance type " .. show(kind)
+      end },
+    { text = "Inside, press Arm on A.", button = "Arm",
+      run = function() local c = assignClient(); acceptedAt = c and c.stats and c.stats.accepted; return acceptedAt end },
+    { text = "Now, on B, change any assignment in B's panel.", timeout = 300,
+      wait = function()
+          local c = assignClient()
+          local now = c and c.stats and c.stats.accepted
+          if now and acceptedAt and now > acceptedAt then
+              local s = assignState("raid instance, edit from B")
+              return true, s and s.results, s and s.lockdown, s and s.restrictions
+          end
+          return false, "nothing from B yet"
+      end },
+    { text = "Still inside: on A, change any assignment. On B: did it arrive (B's panel)?", ask = true },
+    { text = "Reading the final state.", auto = true,
+      run = function()
+          local s = assignState("final")
+          return s and s.results, s and s.received, s and s.accepted, s and s.restrictions
+      end },
+    { text = "Type /reload (or press Reload now) to save the results.", reload = true },
+})
+
 -- ─── boot ───────────────────────────────────────────────────────────────────
 
 local boot = CreateFrame("Frame")
@@ -489,4 +690,5 @@ end)
 NS._test = { Probe = Probe, state = state, stateOK = stateOK, spells = spells, spellsOK = spellsOK,
              casts = function() return casts, lastCast end, walkTraits = walkTraits, ownTraits = ownTraits,
              castSince = castSince, requestInspect = requestInspect,
-             inspectState = function() return inspectWant, inspectGot end }
+             inspectState = function() return inspectWant, inspectGot end,
+             assignState = assignState, mySlot = mySlot }

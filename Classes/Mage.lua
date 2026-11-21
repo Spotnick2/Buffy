@@ -14,6 +14,7 @@ local DEFS = {
         grp         = "Arcane Brilliance",
         fallbackIcon= "Interface\\Icons\\Spell_Holy_MagicalSentry",
         duration    = 3600,
+        assign      = "owner",    -- raid assignment (LibGroupBuffs r37)
     },
     {
         id          = "amplify",
@@ -21,6 +22,7 @@ local DEFS = {
         sngl        = "Amplify Magic",
         fallbackIcon= "Interface\\Icons\\Spell_Holy_FlashHeal",
         duration    = 600,
+        assign      = "owner",    -- one Magic slot: a mage plus Amplify or Dampen
     },
     {
         id          = "dampen",
@@ -28,6 +30,8 @@ local DEFS = {
         sngl        = "Dampen Magic",
         fallbackIcon= "Interface\\Icons\\Spell_Nature_AbolishMagic",
         duration    = 600,
+        assign      = "owner",
+        assignSlot  = 1008,       -- shares Amplify's slot
     },
 }
 local DEFAULTS = {

@@ -14,6 +14,7 @@ local DEFS = {
         sngl        = "Power Word: Fortitude",
         fallbackIcon= "Interface\\Icons\\Spell_Holy_WordFortitude",
         duration    = 3600,
+        assign      = "owner",    -- raid assignment (LibGroupBuffs r37)
     },
     {
         id          = "spirit",
@@ -23,6 +24,7 @@ local DEFS = {
         sngl        = "Divine Spirit",
         fallbackIcon= "Interface\\Icons\\Spell_Holy_PrayerOfSpirit",
         duration    = 3600,
+        assign      = "owner",
     },
     {
         id          = "shadow",
@@ -33,6 +35,19 @@ local DEFS = {
         fallbackIcon= "Interface\\Icons\\Spell_Holy_PrayerOfShadowProtection",
         duration    = 600,
         visibility  = "shadow",   -- also gated by the Shadow Protection mode
+        assign      = "owner",
+    },
+    -- Fear Ward (6346) is a Holy spell for every race on Forever (SkillLineAbility
+    -- 70959: skill line 56, ClassMask 16, RaceMasks -1), not the Dwarf racial. It
+    -- has a row only while the raid has given this priest targets for it.
+    {
+        id          = "fearward",
+        snglID      = 6346,
+        sngl        = "Fear Ward",
+        fallbackIcon= "Interface\\Icons\\Spell_Holy_Excorcism",
+        duration    = 600,
+        assign      = "targets",
+        assignOnly  = true,
     },
 }
 local DEFAULTS = {

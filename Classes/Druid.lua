@@ -14,6 +14,7 @@ local DEFS = {
         grp         = "Gift of the Wild",
         fallbackIcon= "Interface\\Icons\\Spell_Nature_Regeneration",
         duration    = 1800,
+        assign      = "owner",    -- raid assignment (LibGroupBuffs r37)
     },
     {
         id          = "thorns",
@@ -21,6 +22,7 @@ local DEFS = {
         sngl        = "Thorns",
         fallbackIcon= "Interface\\Icons\\Spell_Nature_Thorns",
         duration    = 600,
+        assign      = "targets",  -- a list per druid, which replaces Thorns mode while set
     },
 }
 local DEFAULTS = {

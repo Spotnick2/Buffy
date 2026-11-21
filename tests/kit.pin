@@ -1,5 +1,5 @@
 # WowTestKit for these tests: the commit, and the client build to test against.
-# build=71037 is the newest client build (Buffy's measuredOnBuild is older); the kit has its data.
+# build=71037 is the newest client build and Buffy's measuredOnBuild; the kit has its data.
 sha=a9b2ee01084b9a8e05c11a72edb59a1245e428bc
 build=71037
 api=2

@@ -58,8 +58,8 @@ Disable the matching original addon when using Buffy to avoid duplicate buff win
 - A `?` beside a member's class icon means the spell's range is unknown. A `?` instead of a
   timer means Buffy can't read that aura right now and has no earlier reading to count down from.
 - Hunter and warlock pets don't count for Fortitude, Divine Spirit, Shadow Protection, Mark of
-  the Wild or Arcane Intellect, and aren't offered as their targets: Forever doesn't allow those buffs on them.
-  Druid Thorns in *Everyone* mode includes pets when *Track eligible pets* is on.
+  the Wild or Arcane Intellect, and aren't offered as their targets. On Forever these pets scale
+  from their master. Druid Thorns in *Everyone* mode includes pets when *Track eligible pets* is on.
 
 ## GlassUI
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Priest: hunter and warlock pets no longer count as missing Divine Spirit or appear as its
+  targets. Forever does not allow that buff on them (reported in game). Shadow Protection and
+  other pet types are unchanged.
+
 ## v1.0.2 - 2026-11-18
 
 - LibGlass r13 (was r11). Buffy's window draws its glass with it. Nothing is meant to look

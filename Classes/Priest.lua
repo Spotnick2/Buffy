@@ -56,8 +56,13 @@ DEFAULTS.frameScale = 1
 C.defs, C.defaults = DEFS, DEFAULTS
 local PRIEST_ICON = "Interface\\Icons\\ClassIcon_Priest"
 local HOLY_CANDLE_ID, SACRED_CANDLE_ID, LIGHT_FEATHER_ID = 17028, 17029, 17056
+-- Forever refuses class buffs on hunter and warlock pets, which scale from
+-- their master instead (forever-bugs #27, closed as intended): Fortitude (Priestly #106), Divine Spirit (owner report,
+-- 2026-11-21) and Shadow Protection (the owner expects the same; not yet tried)
+-- neither count nor target them. Other pet types are unchanged until measured.
+local PET_FILTERED = { fort = true, spirit = true, shadow = true }
 local function EligibleMembers(def, members)
-    if def.id ~= "fort" then return members end
+    if not PET_FILTERED[def.id] then return members end
     local out = {}
     for _, member in ipairs(members) do
         if member.class ~= "PET_HUNTER" and member.class ~= "PET_WARLOCK" then

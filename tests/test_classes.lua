@@ -47,6 +47,15 @@ H.eq(#B.engine:MembersFor(amplify, petMix), 4, "amplify keeps every pet")
 B = H.load("PRIEST")
 local fort = B.class.defs[1]
 H.eq(#B.engine:MembersFor(fort, members), 2, "fortitude excludes hunter pets")
+local priestFor = B.engine:MembersFor(fort, petMix)
+H.eq(#priestFor, 2, "fortitude excludes hunter and warlock pets")
+H.eq(priestFor[2] and priestFor[2].class, "PET", "fortitude keeps other pet types")
+local spiritFor = B.engine:MembersFor(B.class.defs[2], petMix)
+H.eq(#spiritFor, 2, "spirit excludes hunter and warlock pets")
+H.eq(spiritFor[2] and spiritFor[2].class, "PET", "spirit keeps other pet types")
+local shadowFor = B.engine:MembersFor(B.class.defs[3], petMix)
+H.eq(#shadowFor, 2, "shadow protection excludes hunter and warlock pets")
+H.eq(shadowFor[2] and shadowFor[2].class, "PET", "shadow protection keeps other pet types")
 local shadow = B.class.defs[3]
 local groups, ord = { [1] = { { unit = "player", class = "PRIEST" } } }, { 1 }
 H.eq(B.IsVisible(shadow, groups, ord), false, "detect hidden without aura")

@@ -2,9 +2,9 @@
 
 ## Unreleased
 
-- Priest: hunter and warlock pets no longer count as missing Divine Spirit or appear as its
-  targets. Forever does not allow that buff on them (reported in game). Shadow Protection and
-  other pet types are unchanged.
+- Priest: hunter and warlock pets no longer count as missing Divine Spirit or Shadow Protection,
+  or appear as their targets. Forever does not allow those buffs on them, as with Fortitude.
+  Other pet types are unchanged.
 
 ## v1.0.2 - 2026-11-18
 

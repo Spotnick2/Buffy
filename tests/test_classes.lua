@@ -91,6 +91,57 @@ B.SetConfig("shadowMode", "detect")
 WoW.inCombat, WoW.secret, WoW.auraReadsThrow = true, true, true
 H.eq(B.IsVisible(shadow, groups, ord), true, "blocked aura does not remove row")
 
+-- Refusal memory (LibGroupBuffs r39, #97): Buffy forwards the library's events,
+-- so a cast the client refuses with "A more powerful spell is already active"
+-- (from the window or anywhere else: no click is tracked) moves the row's
+-- click-time target to the next member. The client's own
+-- sequence, as the library measured it: SENT, FAILED with its castGUID, then
+-- UI error 57 with SPELL_FAILED_AURA_BOUNCED.
+B = H.load("PRIEST")
+rawset(_G, "SPELL_FAILED_AURA_BOUNCED", "A more powerful spell is already active")
+WoW.SetUnit("party1", { name = "Sten", class = "WARRIOR" })
+WoW.SetUnit("party2", { name = "Mirel", class = "MAGE" })
+WoW.groupMembers = 3
+local fortDef = B.class.defs[1]
+local trio = { { unit = "player" }, { unit = "party1" }, { unit = "party2" } }
+WoW.SetAura("player", fortDef.sngl, 3600, 3000, fortDef.snglID)
+H.eq(B.engine:PickTarget(trio, fortDef, false), "party1", "refusal: the first missing member before a refusal")
+H.check(B.ui.RefusalEvents ~= nil, "refusal: the library has refusal memory (r39)")
+if B.ui.RefusalEvents then
+    WoW.dispatch("UNIT_SPELLCAST_SENT", "player", "Sten", "Cast-1", fortDef.snglID)
+    WoW.dispatch("UNIT_SPELLCAST_FAILED", "player", "Cast-1", fortDef.snglID)
+    WoW.dispatch("UI_ERROR_MESSAGE", 57, SPELL_FAILED_AURA_BOUNCED)
+    H.check(B.engine:RefusalOf("party1", fortDef) ~= nil, "refusal: Buffy's forwarded events teach the library")
+    H.eq(B.engine:PickTarget(trio, fortDef, false, nil, true), "party2", "refusal: the click-time pick moves past the refused member")
+    H.eq(B.engine:PickTarget(trio, fortDef, false), "party1", "refusal: the aim wired between clicks does not (combat clears refusals)")
+    H.eq(B.engine:GroupStat(trio, fortDef).nMiss, 2, "refusal: the refused member still counts as missing")
+    WoW.dispatch("PLAYER_REGEN_DISABLED")
+    H.eq(B.engine:RefusalOf("party1", fortDef), nil, "refusal: entering combat, forwarded too, forgets it")
+    WoW.dispatch("PLAYER_REGEN_ENABLED")
+end
+-- A pet leaving prunes the engine, which drops its refusals (#97), so one back
+-- within 30 s isn't skipped for a refusal it no longer has.
+do
+    local pruned, real = 0, B.engine.PruneCache
+    B.engine.PruneCache = function(...) pruned = pruned + 1; return real(...) end
+    WoW.dispatch("UNIT_PET", "party1")
+    B.engine.PruneCache = real
+    H.eq(pruned, 1, "UNIT_PET prunes the engine")
+end
+-- Test mode drops the aura updates that would clear a refusal, but refusals
+-- are still learned (an action-bar cast), so leaving it forgets them all.
+if B.ui.RefusalEvents then
+    SlashCmdList.BUFFY("test 5")
+    H.check(B.previewActive, "refusal: test mode is on")
+    WoW.dispatch("UNIT_SPELLCAST_SENT", "player", "Sten", "Cast-2", fortDef.snglID)
+    WoW.dispatch("UNIT_SPELLCAST_FAILED", "player", "Cast-2", fortDef.snglID)
+    WoW.dispatch("UI_ERROR_MESSAGE", 57, SPELL_FAILED_AURA_BOUNCED)
+    H.check(B.engine:RefusalOf("party1", fortDef) ~= nil, "refusal: learned during test mode")
+    SlashCmdList.BUFFY("test off")
+    H.check(not B.previewActive, "refusal: test mode is off")
+    H.eq(B.engine:RefusalOf("party1", fortDef), nil, "refusal: leaving test mode forgets it")
+end
+
 B = H.load("MAGE")
 local amplify, dampen = B.class.defs[2], B.class.defs[3]
 B.SetConfig("amplifyMode", "always")

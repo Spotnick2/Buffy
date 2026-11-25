@@ -18,7 +18,7 @@ local external = assert(P.externals())
 H.eq(external["Libs/LibGlass-1.0"].ref, "r13", "glass immutable release pin")
 local pin = external["Libs/LibGroupBuffs-1.0"]
 H.eq(pin.kind, "tag", "library pinned to a release tag")
-H.eq(pin.ref, "r36", "library pinned to tested source (r36 = 5bae625)")
+H.eq(pin.ref, "r39", "library pinned to tested source (r39 = 3fab1f9, refusal memory)")
 H.check(H.read("BuffyCompat.lua"):find("NEEDS_MINOR = 33", 1, true), "growth and preview API floor")
 local logo = assert(io.open("Media/Logo.tga", "rb"))
 local header = logo:read(18); logo:close()

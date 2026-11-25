@@ -95,6 +95,20 @@ local function Initialize()
             B.Say("The window " .. (minimized and "minimizes" or "restores") .. " when combat ends.")
         end,
     })
+    -- Refusal memory (LibGroupBuffs r39, #97). When the client refuses a buff
+    -- cast out of combat with "A more powerful spell is already active" (a
+    -- world buff, Camp Benefits), whether from the window, an action bar or a
+    -- macro, the row's click-time target skips that member
+    -- for a while. The library learns it from these events, so each one goes to
+    -- it whole, from a frame of its own: the main handler below passes on only
+    -- two arguments and drops events in test mode. A world buff can't simply be
+    -- listed as covering Fortitude: a high enough rank of Fortitude beats it, so
+    -- only the client's refusal says.
+    if B.ui.RefusalEvents then
+        local refusals = CreateFrame("Frame")
+        B.RegisterEvents(refusals, unpack(B.ui:RefusalEvents()))
+        refusals:SetScript("OnEvent", function(_, event, ...) B.ui:RefusalEvent(event, ...) end)
+    end
     B.visibility = GB.Visibility({
         ui = B.ui, isMyClass = function() return loggedIn == true end,
         showSolo = function() return B.Get("showSolo") == true end,
@@ -117,6 +131,10 @@ local function EndPreview()
     B.ui:Close()
     if B.class.forgetRoster then B.class.forgetRoster() end
     B.engine:PruneCache()
+    -- Refusals keep being learned in test mode (their frame isn't gated), but
+    -- the aura updates that would clear them were dropped above, so a member
+    -- whose blocking buff ended meanwhile would still be skipped (#97).
+    if B.engine.ClearRefusals then B.engine:ClearRefusals() end
     RefreshSpells()
     for _, enabled in ipairs(B.previewSoloToggles or {}) do B.visibility:SoloToggled(enabled) end
     B.previewSoloToggles = nil
@@ -224,7 +242,11 @@ events:SetScript("OnEvent", function(_, event, arg1, arg2)
                 ui:ScheduleRefresh()
             end
         end
-    elseif event == "UNIT_PET" then ui:ScheduleRefresh()
+    elseif event == "UNIT_PET" then
+        -- A pet that left drops its cache and any refusal the library holds for
+        -- it (r39, #97), so one back within 30 s starts clean.
+        engine:PruneCache()
+        ui:ScheduleRefresh()
     elseif event == "GROUP_JOINED" then
         if B.class.forgetRoster then B.class.forgetRoster() end
         vis:GroupJoined()

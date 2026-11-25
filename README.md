@@ -77,9 +77,9 @@ This checkout needs the companion LibGroupBuffs implementation; see
 is not a game installation. Build a staged package using:
 
 ```powershell
-pwsh tests/run.ps1 -Library .work/LibGroupBuffs-r36 -LibGlass .work/LibGlass-r13
-pwsh Tools/package.ps1 -Library .work/LibGroupBuffs-r36 -LibGlass .work/LibGlass-r13
-$env:LIBGROUPBUFFS = "$PWD/.work/LibGroupBuffs-r36"
+pwsh tests/run.ps1 -Library .work/LibGroupBuffs-r39 -LibGlass .work/LibGlass-r13
+pwsh Tools/package.ps1 -Library .work/LibGroupBuffs-r39 -LibGlass .work/LibGlass-r13
+$env:LIBGROUPBUFFS = "$PWD/.work/LibGroupBuffs-r39"
 $env:LIBGLASS = "$PWD/.work/LibGlass-r13"
 python tests/check_package.py .work/package
 ```

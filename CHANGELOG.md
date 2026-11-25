@@ -8,8 +8,8 @@
   left click, or the right click once you know the group form (Prayer of Fortitude, which is
   unchanged). This works whether the refused cast came from the window, an action bar or a
   macro. It tries that member again after 30 seconds, or sooner if their buffs change, and you
-  can still pick them yourself from the member list. Needs LibGroupBuffs r39 (refusal memory,
-  #97).
+  can still pick them yourself from the member list.
+- LibGroupBuffs r39 (was r36), which adds this refusal memory (#97). LibGlass is still r13.
 
 ## v1.0.3 - 2026-11-22
 

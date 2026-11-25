@@ -2,12 +2,14 @@
 
 ## Unreleased
 
-- When the game refuses a buff with "A more powerful spell is already active" (a world buff
-  such as Might of Stormwind or Warchief's Blessing, or Camp Benefits), the window's main
-  button now moves on to the next member instead of trying the same one again. This works
-  whether the refused cast came from the window, an action bar or a macro. It tries that member
-  again after 30 seconds, or sooner if their buffs change, and you can still pick them yourself
-  from the member list. Needs LibGroupBuffs r39 (refusal memory, #97).
+- When the game refuses a single-target buff with "A more powerful spell is already active" (a
+  world buff such as Might of Stormwind or Warchief's Blessing, or Camp Benefits), the row's
+  single-target click now moves on to the next member instead of trying the same one again: the
+  left click, or the right click once you know the group form (Prayer of Fortitude, which is
+  unchanged). This works whether the refused cast came from the window, an action bar or a
+  macro. It tries that member again after 30 seconds, or sooner if their buffs change, and you
+  can still pick them yourself from the member list. Needs LibGroupBuffs r39 (refusal memory,
+  #97).
 
 ## v1.0.3 - 2026-11-22
 

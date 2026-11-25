@@ -131,6 +131,10 @@ local function EndPreview()
     B.ui:Close()
     if B.class.forgetRoster then B.class.forgetRoster() end
     B.engine:PruneCache()
+    -- Refusals keep being learned in test mode (their frame isn't gated), but
+    -- the aura updates that would clear them were dropped above, so a member
+    -- whose blocking buff ended meanwhile would still be skipped (#97).
+    if B.engine.ClearRefusals then B.engine:ClearRefusals() end
     RefreshSpells()
     for _, enabled in ipairs(B.previewSoloToggles or {}) do B.visibility:SoloToggled(enabled) end
     B.previewSoloToggles = nil

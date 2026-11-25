@@ -128,6 +128,19 @@ do
     B.engine.PruneCache = real
     H.eq(pruned, 1, "UNIT_PET prunes the engine")
 end
+-- Test mode drops the aura updates that would clear a refusal, but refusals
+-- are still learned (an action-bar cast), so leaving it forgets them all.
+if B.ui.RefusalEvents then
+    SlashCmdList.BUFFY("test 5")
+    H.check(B.previewActive, "refusal: test mode is on")
+    WoW.dispatch("UNIT_SPELLCAST_SENT", "player", "Sten", "Cast-2", fortDef.snglID)
+    WoW.dispatch("UNIT_SPELLCAST_FAILED", "player", "Cast-2", fortDef.snglID)
+    WoW.dispatch("UI_ERROR_MESSAGE", 57, SPELL_FAILED_AURA_BOUNCED)
+    H.check(B.engine:RefusalOf("party1", fortDef) ~= nil, "refusal: learned during test mode")
+    SlashCmdList.BUFFY("test off")
+    H.check(not B.previewActive, "refusal: test mode is off")
+    H.eq(B.engine:RefusalOf("party1", fortDef), nil, "refusal: leaving test mode forgets it")
+end
 
 B = H.load("MAGE")
 local amplify, dampen = B.class.defs[2], B.class.defs[3]

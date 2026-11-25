@@ -73,7 +73,9 @@ authoritative for the WoW code-review method and verdict.
 v0.1.1-alpha1 and -alpha2 pinned the same library commit by `commit:`, and CurseForge's tag
 webhook built no file for either, so a library pilot gets a tag first. v0.1.0 shipped on r32,
 v1.0.0-beta1 on r33, v1.0.0 and v1.0.1 on r34. v1.0.0 and v1.0.1 shipped LibGlass r11; main pins
-LibGlass r13 and LibGroupBuffs r36 since 2026-11-18.
+LibGlass r13 and LibGroupBuffs r36 since 2026-11-18. The refusal-memory pilot (LibGroupBuffs
+#97, minor 39) pins the library's merge commit `3fab1f9` by `commit:` for its in-game check, and
+moves to `tag: r39` before it merges; `tests/test_manifest.lua` fails until then.
 Never use latest.
 Include dependency licenses. Exclude tests, Tools, docs, .work, and the source PNG from packages.
 

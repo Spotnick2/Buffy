@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- When the game refuses a buff with "A more powerful spell is already active" (a world buff
+  such as Might of Stormwind or Warchief's Blessing, or Camp Benefits), the window's main
+  button now moves on to the next member instead of trying the same one again. This works
+  whether the refused cast came from the window, an action bar or a macro. It tries that member
+  again after 30 seconds, or sooner if their buffs change, and you can still pick them yourself
+  from the member list. Needs LibGroupBuffs r39 (refusal memory, #97).
+
 ## v1.0.3 - 2026-11-22
 
 - Priest: hunter and warlock pets no longer count as missing Divine Spirit or Shadow Protection,

@@ -61,11 +61,12 @@ Disable the matching original addon when using Buffy to avoid duplicate buff win
   the Wild or Arcane Intellect, and aren't offered as their targets. On Forever these pets scale
   from their master. Druid Thorns in *Everyone* mode includes pets when *Track eligible pets* is on.
 - When the game refuses a single-target buff with "A more powerful spell is already active" (a
-  world buff such as Might of Stormwind or Warchief's Blessing, or Camp Benefits), the row's
-  single-target click moves on to the next member for 30 seconds: the left click, or the right
-  click once you know the group form. Buffy can't tell in advance whose buff is stronger than
-  yours, so the first cast on that member still fails. You can still pick them yourself from the
-  member list.
+  world buff such as Might of Stormwind or Warchief's Blessing, or Camp Benefits) out of combat,
+  the row's single-target click skips that member for up to 30 seconds: the left click, or the
+  right click once you know the group form. Entering combat forgets it, and so can a change to
+  their buffs. Buffy can't tell in advance whose buff is stronger than yours, so the first cast on
+  that member still fails, and when everyone left has been refused the click casts nothing. You
+  can still pick them yourself from the member list.
 
 ## GlassUI
 

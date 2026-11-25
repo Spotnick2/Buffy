@@ -123,9 +123,10 @@ above. The battleground `?` marks were skipped on both builds and are still to c
 The owner's check of Buffy #68 (b96495e, library `3fab1f9`, later tagged r39, LibGlass r13), on a
 Priest, in a group with a priest and a mage. Fortitude on the priest was refused with "A more
 powerful spell is already active", and the next click skipped them and buffed the mage.
-While the mage still had a stronger Fortitude than the caster's and nobody else needed it, one
-top-up click on the mage was also refused. That's by design: the client exposes no buff's strength
-(LibGroupBuffs run #522: after that bounce the row arms nothing). Nothing else misbehaved.
+Before that, the mage already had Fortitude (the owner: "the higher fortitude on my mage"), and
+with nobody else needing it, a top-up click on the mage was refused too. The client's refusal names
+neither the blocking aura nor its strength, so Buffy can't avoid that first cast. A separate library
+run, #522, showed the row arms nothing after such a bounce. Nothing else misbehaved.
 Bugsy logged no Buffy or LibGroupBuffs error. Only the single-target click was checked. Prayer of
 Fortitude on a refused member, and an action-bar or macro bounce teaching the window, are
 unmeasured in Buffy. The client build wasn't recorded, and `measuredOnBuild` stays 71037.

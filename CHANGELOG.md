@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.0.4 - 2026-11-25
 
 - When the game refuses a single-target buff with "A more powerful spell is already active" (a
   world buff such as Might of Stormwind or Warchief's Blessing, or Camp Benefits), the row's
@@ -8,7 +8,7 @@
   left click, or the right click once you know the group form (Prayer of Fortitude, which is
   unchanged). This works whether the refused cast came from the window, an action bar or a
   macro. It tries that member again after 30 seconds, or sooner if their buffs change, and you
-  can still pick them yourself from the member list.
+  can still pick them yourself from the member list. Checked in game on a Priest.
 - LibGroupBuffs r39 (was r36), which adds this refusal memory (#97). LibGlass is still r13.
 
 ## v1.0.3 - 2026-11-22

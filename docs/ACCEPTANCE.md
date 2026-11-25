@@ -118,6 +118,18 @@ Growth, combat, the vendor and a second class were skipped on this build; they p
 above. The battleground `?` marks were skipped on both builds and are still to check.
 `measuredOnBuild` moved to 71037 on this check.
 
+## Refusal memory, LibGroupBuffs 3fab1f9 = r39 (#68), 2026-11-25
+
+The owner's check of Buffy #68 (b96495e, library `3fab1f9`, later tagged r39, LibGlass r13), on a
+Priest, in a group with a priest and a mage. Fortitude on the priest was refused with "A more
+powerful spell is already active", and the next click skipped them and buffed the mage.
+While the mage still had a stronger Fortitude than the caster's and nobody else needed it, one
+top-up click on the mage was also refused. That's by design: the client exposes no buff's strength
+(LibGroupBuffs run #522: after that bounce the row arms nothing). Nothing else misbehaved.
+Bugsy logged no Buffy or LibGroupBuffs error. Only the single-target click was checked. Prayer of
+Fortitude on a refused member, and an action-bar or macro bounce teaching the window, are
+unmeasured in Buffy. The client build wasn't recorded, and `measuredOnBuild` stays 71037.
+
 ## GlassUI integration
 
 GlassUI PR #160, the hub roster entry, merged on 2026-10-24 UTC. GlassUI itself is not

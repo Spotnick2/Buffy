@@ -1,14 +1,15 @@
 # Changelog
 
-## Unreleased
+## v1.0.4 - 2026-11-25
 
 - When the game refuses a single-target buff with "A more powerful spell is already active" (a
-  world buff such as Might of Stormwind or Warchief's Blessing, or Camp Benefits), the row's
-  single-target click now moves on to the next member instead of trying the same one again: the
-  left click, or the right click once you know the group form (Prayer of Fortitude, which is
+  world buff such as Might of Stormwind or Warchief's Blessing, or Camp Benefits) out of combat,
+  the row's single-target click now skips that member instead of trying them again: the left
+  click, or the right click once you know the group form (Prayer of Fortitude, which is
   unchanged). This works whether the refused cast came from the window, an action bar or a
-  macro. It tries that member again after 30 seconds, or sooner if their buffs change, and you
-  can still pick them yourself from the member list.
+  macro. The skip lasts up to 30 seconds; entering combat or a change to their buffs ends it
+  sooner. If everyone left has been refused, the click casts nothing. You can still pick a
+  skipped member yourself from the member list. Checked in game on a Priest.
 - LibGroupBuffs r39 (was r36), which adds this refusal memory (#97). LibGlass is still r13.
 
 ## v1.0.3 - 2026-11-22

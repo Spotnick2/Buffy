@@ -58,6 +58,11 @@ copies: never edit them here. Buffy has no stub of its own: the mock is LibGroup
 the harness with a `-- WowTestKit #N:` comment meanwhile. `tests\run.ps1 -KitDev` runs against the
 `..\WowTestKit` working copy instead of the pin. `tests/test_methods.lua` checks every widget method
 Buffy's frames call against the pinned build (`Kit.checkMethods`).
+A kit pin bump first copies the kit's three bootstrap files at the new sha. It then runs
+`pwsh tests/kit.ps1 -Compare HEAD -Snapshot <script.lua>` (WowTestKit's README, "Comparing two
+pins"), with `$env:LIBGROUPBUFFS` and `$env:LIBGLASS` naming copies at the pins, since `-Compare`
+passes no `-Library`. The snapshot script is a throwaway (WowTestKit's `docs/ADOPTING.md`,
+section 1), loading each class through `H.load`.
 For a library change, run its suite and Priestly/Wildly/Magely against the modified checkout.
 Document baseline failures without changing unrelated repositories.
 

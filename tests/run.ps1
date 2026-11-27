@@ -16,7 +16,9 @@
     (the glass material) and LibGroupBuffs-1.0 (the compat layer, engine and
     window, which draws with LibGlass). The tests read each from a checkout
     next to this repository - ../LibGlass and ../LibGroupBuffs - or from
-    -LibGlass / $env:LIBGLASS and -Library. There is no vendored copy to fall
+    -LibGlass / $env:LIBGLASS and -Library / $env:LIBGROUPBUFFS (the
+    variable is how kit.ps1 -Compare, which passes no -Library, reaches a
+    copy at the pin). There is no vendored copy to fall
     back to: a stale one would let the suite pass against code that no longer
     ships.
 
@@ -52,7 +54,9 @@ if (-not (Test-Path $luac)) {
 
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 
-if (-not $Library) { $Library = Join-Path (Split-Path -Parent $RepoRoot) "LibGroupBuffs" }
+if (-not $Library) {
+    $Library = if ($env:LIBGROUPBUFFS) { $env:LIBGROUPBUFFS } else { Join-Path (Split-Path -Parent $RepoRoot) "LibGroupBuffs" }
+}
 if (-not (Test-Path (Join-Path $Library "LibGroupBuffs-1.0.xml"))) {
     Write-Error ("LibGroupBuffs-1.0 not found at $Library. Clone " +
         "https://github.com/Spotnick2/LibGroupBuffs next to this repository, or pass -Library.")

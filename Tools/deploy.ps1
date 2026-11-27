@@ -19,9 +19,10 @@ $addons = [IO.Path]::GetFullPath($AddOnsPath)
 # removes files the module no longer lists. It runs after Buffy's package is built and before Buffy
 # is copied, so a refused probe leaves the installed Buffy untouched.
 $probeDir = Join-Path $PSScriptRoot 'BuffyProbe'
-$foreverProbe = if ($env:FOREVERPROBE) { $env:FOREVERPROBE } else { Join-Path (Split-Path -Parent $repo) 'ForeverProbe' }
-$fpDeploy = Join-Path $foreverProbe 'Tools\deploy.ps1'
 if ($Probe) {
+    # Resolved only for -Probe, so an unreachable FOREVERPROBE never stops a Buffy-only deploy.
+    $foreverProbe = if ($env:FOREVERPROBE) { $env:FOREVERPROBE } else { Join-Path (Split-Path -Parent $repo) 'ForeverProbe' }
+    $fpDeploy = Join-Path $foreverProbe 'Tools\deploy.ps1'
     if (-not (Test-Path -LiteralPath $fpDeploy)) {
         throw "ForeverProbe checkout not found at $foreverProbe (or set `$env:FOREVERPROBE)"
     }
@@ -38,8 +39,10 @@ $target = [IO.Path]::GetFullPath((Join-Path $addons 'Buffy'))
 if ((Split-Path -Parent $target) -ne $addons.TrimEnd('\', '/')) { throw 'Invalid addon target.' }
 
 if ($Probe) {
+    # ForeverProbe refuses an AddOns folder that doesn't exist; Buffy's copy below would create it.
+    New-Item -ItemType Directory -Path $addons -Force | Out-Null
     & pwsh -NoProfile -File $fpDeploy -AddOnsPath $addons -Module $probeDir -Lua $Lua
-    if ($LASTEXITCODE -ne 0) { throw 'ForeverProbe deploy -Module refused; nothing was copied, Buffy included' }
+    if ($LASTEXITCODE -ne 0) { throw 'ForeverProbe deploy -Module failed (its error is above); Buffy was not copied' }
 }
 
 New-Item -ItemType Directory -Path $target -Force | Out-Null

@@ -45,11 +45,10 @@ Copy-Item -Path (Join-Path $stage 'Buffy\*') -Destination $target -Recurse -Forc
 Write-Host "Deployed Buffy to $target"
 
 if ($Probe) {
-    # The host first, with its own deploy; it refuses an incomplete checkout.
-    & pwsh -NoProfile -File (Join-Path $foreverProbe 'Tools\deploy.ps1') -AddOnsPath $addons
-    if ($LASTEXITCODE -ne 0) { throw 'ForeverProbe deploy refused; BuffyProbe was not copied' }
-    $probeTarget = Join-Path $addons 'BuffyProbe'
-    New-Item -ItemType Directory -Path $probeTarget -Force | Out-Null
-    foreach ($f in $probeFiles) { Copy-Item -LiteralPath (Join-Path $probeDir $f) -Destination (Join-Path $probeTarget $f) -Force }
-    Write-Host "Deployed BuffyProbe to $probeTarget. /reload, then /fp steps bf pin." -ForegroundColor Cyan
+    # ForeverProbe's own deploy (-Module, ForeverProbe#47): the host, then BuffyProbe. It checks the
+    # module again (TOC dependency, listed files, luac -p) and copies nothing if one fails, stamps
+    # the copy's TOC with the commit, lints its globals and removes files the module no longer lists.
+    & pwsh -NoProfile -File (Join-Path $foreverProbe 'Tools\deploy.ps1') -AddOnsPath $addons -Module $probeDir -Lua $Lua
+    if ($LASTEXITCODE -ne 0) { throw 'ForeverProbe deploy -Module refused; no probe was copied' }
+    Write-Host "Deployed BuffyProbe to $(Join-Path $addons 'BuffyProbe'). /reload, then /fp steps bf pin." -ForegroundColor Cyan
 }

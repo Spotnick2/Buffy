@@ -1,8 +1,7 @@
 -- All saved writes live here. Profiles are account-wide by class; window state is per character.
 local B = Buffy
 if not B.API then return end
-local API = B.API
-local settings, build
+local settings, interface
 local modes = { always = true, detect = true, instance = true }
 local thorns = { default = true, tanks = true, self = true, everyone = true, disabled = true }
 local unknownInstances = {}
@@ -11,6 +10,13 @@ local function Account()
     if type(BuffyAccountDB) ~= "table" then BuffyAccountDB = {} end
     if type(BuffyAccountDB.classes) ~= "table" then BuffyAccountDB.classes = {} end
     return BuffyAccountDB
+end
+
+-- The Interface, GetBuildInfo()'s 4th value. Buff durations don't change from build to build,
+-- and a build ships twice a week, so what was learned is kept until an Interface bump (#72).
+local function ClientInterface()
+    local ok, _, _, _, n = pcall(GetBuildInfo)
+    return ok and tonumber(n) or "?"
 end
 
 local function Character()
@@ -58,7 +64,9 @@ function B.InitConfig()
             { label = "class profile", get = B.Profile },
             { label = "per-character", get = Character },
         },
-        -- The build Buffy's pin check last passed on (docs/FOREVER-PROBE.md, pin rev 3).
+        -- LibGroupBuffs r39 requires it and reports "newBuild" at a login on any other build.
+        -- Buffy prints nothing for it (the filter below). Dropped when the library drops the
+        -- check (LibGroupBuffs #101).
         measuredOnBuild = "71037",
         onChanged = function(key) if B.OnConfigChanged then B.OnConfigChanged(key) end end,
     })
@@ -96,17 +104,14 @@ function B.InitConfig()
         end
     end
     if B.WindowState("visible") == nil then B.SetWindowState("visible", true) end
-    build = API.ClientBuild() or "?"
+    -- The development copy's per-build notice wrote it until #72. Nothing reads it now.
+    Account().seenBuild = nil
+    interface = ClientInterface()
 end
 
-B.reportFilters.newBuild = function()
-    local version = API.AddonVersion("Buffy")
-    if version ~= "dev" and version ~= "@" .. "project-version@" then return nil end
-    local account, current = Account(), API.ClientBuild()
-    if account.seenBuild == current then return nil end
-    account.seenBuild = current
-    return "Client build " .. tostring(current) .. ": Buffy still needs in-game acceptance on this build."
-end
+-- A new build with the same Interface is not a re-check, so Buffy announces no build (#72),
+-- not even on a development copy.
+B.reportFilters.newBuild = function() return nil end
 
 function B.EnteringWorld(initial, reload)
     if settings then settings:HandleEnteringWorld(initial, reload) end
@@ -117,8 +122,9 @@ function B.LearnDuration(spell, seconds)
     local db = B.Profile()
     if not db then return end
     local store = db.learnedDurations
-    if type(store) ~= "table" or store.build ~= build then
-        store = { build = build }
+    -- A store from before #72 is keyed by .build instead: it has no .interface, and is relearned once.
+    if type(store) ~= "table" or store.interface ~= interface then
+        store = { interface = interface }
         db.learnedDurations = store
     end
     if store[spell] == seconds then return end
@@ -128,7 +134,7 @@ end
 
 function B.LearnedDuration(spell)
     local store = B.Get("learnedDurations")
-    if type(store) == "table" and store.build == build then return store[spell] end
+    if type(store) == "table" and store.interface == interface then return store[spell] end
 end
 
 function B.IsBuffEnabled(id)

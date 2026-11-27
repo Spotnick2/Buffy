@@ -112,8 +112,7 @@ second-class steps were skipped.
 | Second class | Skipped. Step 24 read the Mage again, so its "another class" check failed by design; the spell report itself was clean (0 unresolved, 0 unknown) |
 
 What this shows: Buffy on its pins loads and runs on 71037, its spell names resolve, and its window,
-previews, click-casting and tooltip work, with no error or blocked action. It is the basis for
-`measuredOnBuild = "71037"`. It doesn't re-check combat, growth, the vendor or a second class on
+previews, click-casting and tooltip work, with no error or blocked action. It doesn't re-check combat, growth, the vendor or a second class on
 this build; those passed on 70959 (rev 1).
 
 The screenshots were looked at and then deleted with `screenshots.ps1 -Remove`.

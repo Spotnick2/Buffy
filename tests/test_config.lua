@@ -40,4 +40,45 @@ H.eq(B.Get("frameAlpha"), 0.96, "NaN alpha repaired")
 H.eq(B.Get("growDirection"), "down", "invalid growth direction repaired")
 H.eq(B.Get("autoBuyGift"), false, "Druid restock disabled independently")
 H.eq(B.Get("giftTarget"), 80, "invalid Gift target repaired")
+
+-- #72: no build is announced or recorded, not even by a development copy (the unpackaged
+-- TOC's version token). The stub's build (WoW.build) is not the library's measuredOnBuild,
+-- so the library does report newBuild.
+local function printed(pattern)
+    for _, line in ipairs(WoW.messages) do if line:find(pattern) then return line end end
+end
+B = H.load("PRIEST", nil, function()
+    BuffyAccountDB = { seenBuild = "69977", classes = {} }
+    C_AddOns.GetAddOnMetadata = function(_, key)
+        if key == "Version" then return "@" .. "project-version@" end
+    end
+end)
+H.eq(B.API.AddonVersion("Buffy"), "@" .. "project-version@", "a development copy")
+H.eq(BuffyAccountDB.seenBuild, nil, "the old seenBuild is deleted")
+WoW.dispatch("PLAYER_ENTERING_WORLD", true, false)
+WoW.dispatch("PLAYER_ENTERING_WORLD", false, true)
+H.eq(printed("[Bb]uild"), nil, "a development copy's login and reload print no build line")
+H.eq(BuffyAccountDB.seenBuild, nil, "no build is recorded")
+
+-- Learned durations last until an Interface bump, not a build.
+local function withClient(build, interface)
+    return function()
+        BuffyAccountDB = account
+        WoW.build = build
+        GetBuildInfo = function() return "1.60.1", build, "Nov 26 2026", interface end
+    end
+end
+B = H.load("PRIEST", nil, withClient("71037", 16001))
+B.LearnDuration("Test", 1800)
+H.eq(account.classes.PRIEST.learnedDurations.interface, 16001, "durations keyed by the Interface")
+H.eq(account.classes.PRIEST.learnedDurations.build, nil, "not by the build")
+B = H.load("PRIEST", nil, withClient("71139", 16001))
+H.eq(B.LearnedDuration("Test"), 1800, "a new build keeps the learned durations")
+B = H.load("PRIEST", nil, withClient("71200", 16002))
+H.eq(B.LearnedDuration("Test"), nil, "a new Interface discards them")
+B.LearnDuration("Test", 1200)
+H.eq(account.classes.PRIEST.learnedDurations.interface, 16002, "relearned under the new Interface")
+account.classes.PRIEST.learnedDurations = { build = "71037", Test = 1800 }
+B = H.load("PRIEST", nil, withClient("71037", 16001))
+H.eq(B.LearnedDuration("Test"), nil, "a store keyed by build (before #72) is relearned once")
 H.done("config")

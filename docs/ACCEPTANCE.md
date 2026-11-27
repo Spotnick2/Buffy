@@ -37,6 +37,25 @@ matching original addon for the main pass.
   persist. Check another character of the same class shares buff settings but has separate
   position/visibility, and a different class has its own profile. `/reload` alone is insufficient.
 
+## At an Interface bump
+
+A new client build with the same Interface (the 4th value of `GetBuildInfo()`) is not a re-check:
+it is diffed centrally, and only a name the diff removed or changed comes to Buffy, as its own
+issue. A new Interface (a new `## Interface:` for `Buffy.toc`) is the full check, even when the diff
+is empty:
+
+- Bump `## Interface:` in `Buffy.toc` and `build=` in `tests/kit.pin`, and run the tests.
+- Run `/fp steps bf pin` ([FOREVER-PROBE.md](FOREVER-PROBE.md)) on the pinned libraries, with
+  nothing skipped this time:
+  - both growth directions;
+  - close and minimize in combat;
+  - a vendor visit where a restock purchase is due;
+  - a second class;
+  - a battleground's `?` marks.
+- Read Bugsy (`!Bugsy.lua`) for any error from `AddOns/Buffy/`, and record the result here with
+  the client build it ran on.
+- Learned durations are relearned once on the new Interface (`BuffyConfig.lua`); that is expected.
+
 ## Pending checks for Buffy issues #5-#11
 
 These changes were tested offline against local LibGroupBuffs commit
@@ -116,7 +135,6 @@ the tooltip colours. Bugsy logged no Lua error or blocked action.
 
 Growth, combat, the vendor and a second class were skipped on this build; they passed on 70959
 above. The battleground `?` marks were skipped on both builds and are still to check.
-`measuredOnBuild` moved to 71037 on this check.
 
 ## Refusal memory, LibGroupBuffs 3fab1f9 = r39 (#68), 2026-11-25
 
@@ -129,7 +147,7 @@ neither the blocking aura nor its strength, so Buffy can't avoid that first cast
 run, #522, showed the row arms nothing after such a bounce. Nothing else misbehaved.
 Bugsy logged no Buffy or LibGroupBuffs error. Only the single-target click was checked. Prayer of
 Fortitude on a refused member, and an action-bar or macro bounce teaching the window, are
-unmeasured in Buffy. The client build wasn't recorded, and `measuredOnBuild` stays 71037.
+unmeasured in Buffy. The client build wasn't recorded.
 
 ## GlassUI integration
 

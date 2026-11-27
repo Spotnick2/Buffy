@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Buff durations Buffy learned are now kept when the game updates, and relearned only when the
+  game's Interface version changes. Until now every client build, about twice a week, made Buffy
+  learn them again. After this update they are relearned once.
+- A development copy no longer prints a "Client build" line at login or saves the build it saw
+  (#72). Released copies did neither.
+
 ## v1.0.4 - 2026-11-25
 
 - When the game refuses a single-target buff with "A more powerful spell is already active" (a

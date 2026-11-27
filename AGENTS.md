@@ -26,7 +26,11 @@ newest ../References/Forever/api/forever-api-<version>.<build>.md (70532 at init
 The dump proves API presence, not rendering, taint safety, or persistence. Check Blizzard's
 shipped code in ../wow-ui-source and measurements in ../Priestly/docs/FOREVER-PROBE.md.
 Owner acceptance covers Priest, Mage, and Druid Mark of the Wild; see docs/ACCEPTANCE.md.
-Do not advance specific measured build claims from offline tests or general acceptance feedback.
+A new client build with the same Interface is not a re-check: Buffy records and announces no
+build (#72), and a name that build's API diff removed or changed comes as its own issue. Only an
+Interface bump re-runs the in-game checks (docs/ACCEPTANCE.md, "At an Interface bump"). Keep each
+finding's build beside the finding, and never claim a measurement from offline tests or general
+acceptance feedback.
 
 All moved APIs go through Buffy.API at call time. Never capture library implementation
 functions: LibStub upgrades in place. Aura secrecy can throw on comparisons; keep raw aura

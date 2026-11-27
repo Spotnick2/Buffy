@@ -59,8 +59,8 @@ local function Report(text, kind)
         local label, names = text:match("^([^:]*:)(.*)$")
         text = label and ("|cffff6666" .. label .. "|r" .. names) or ("|cffff6666" .. text .. "|r")
     end
-    -- Before any filter: a filter may record that it spoke (newBuild does),
-    -- and with no chat frame nothing was said.
+    -- Before any filter: a filter may record that it spoke, and with no chat
+    -- frame nothing was said.
     if not DEFAULT_CHAT_FRAME then return end
     local filter = Buffy.reportFilters[kind]
     if filter then text = filter(text, kind) end

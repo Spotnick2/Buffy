@@ -13,24 +13,21 @@ $ErrorActionPreference = 'Stop'
 $repo = Split-Path -Parent $PSScriptRoot
 $addons = [IO.Path]::GetFullPath($AddOnsPath)
 
-# The probe is checked before anything is copied, so a broken probe leaves Buffy untouched.
+# With -Probe, ForeverProbe's own deploy (-Module, ForeverProbe#47) installs the host and BuffyProbe.
+# It checks the module first (the TOC's ForeverProbe dependency, every listed file, luac -p) and
+# copies nothing if one fails, then stamps the copy's TOC with the commit, lints its globals and
+# removes files the module no longer lists. It runs after Buffy's package is built and before Buffy
+# is copied, so a refused probe leaves the installed Buffy untouched.
 $probeDir = Join-Path $PSScriptRoot 'BuffyProbe'
-$probeFiles = @('BuffyProbe.toc', 'BuffyProbe.lua')
 $foreverProbe = if ($env:FOREVERPROBE) { $env:FOREVERPROBE } else { Join-Path (Split-Path -Parent $repo) 'ForeverProbe' }
+$fpDeploy = Join-Path $foreverProbe 'Tools\deploy.ps1'
 if ($Probe) {
-    foreach ($f in $probeFiles) {
-        if (-not (Test-Path -LiteralPath (Join-Path $probeDir $f))) { throw "Missing probe file: $f" }
-    }
-    $luac = Join-Path (Split-Path -Parent $Lua) 'luac.exe'
-    if (Test-Path -LiteralPath $luac) {
-        & $luac -p (Join-Path $probeDir 'BuffyProbe.lua')
-        if ($LASTEXITCODE -ne 0) { throw 'luac -p failed on BuffyProbe.lua' }
-        Remove-Item -LiteralPath 'luac.out' -ErrorAction SilentlyContinue
-    } else {
-        Write-Host "  luac -p SKIPPED (no $luac)" -ForegroundColor Yellow
-    }
-    if (-not (Test-Path -LiteralPath (Join-Path $foreverProbe 'Tools\deploy.ps1'))) {
+    if (-not (Test-Path -LiteralPath $fpDeploy)) {
         throw "ForeverProbe checkout not found at $foreverProbe (or set `$env:FOREVERPROBE)"
+    }
+    # A checkout from before ForeverProbe#47 has no -Module: it would deploy only the host and exit 0.
+    if (-not (Get-Command -Name $fpDeploy -CommandType ExternalScript).Parameters.ContainsKey('Module')) {
+        throw "ForeverProbe at $foreverProbe has no deploy.ps1 -Module (ForeverProbe#47): update it to its main, then deploy again"
     }
 }
 
@@ -39,16 +36,16 @@ $stage = Join-Path $repo ('.work\deploy-' + [guid]::NewGuid().ToString('N'))
 if ($LASTEXITCODE -ne 0) { throw 'Package build failed; deployment stopped.' }
 $target = [IO.Path]::GetFullPath((Join-Path $addons 'Buffy'))
 if ((Split-Path -Parent $target) -ne $addons.TrimEnd('\', '/')) { throw 'Invalid addon target.' }
+
+if ($Probe) {
+    & pwsh -NoProfile -File $fpDeploy -AddOnsPath $addons -Module $probeDir -Lua $Lua
+    if ($LASTEXITCODE -ne 0) { throw 'ForeverProbe deploy -Module refused; nothing was copied, Buffy included' }
+}
+
 New-Item -ItemType Directory -Path $target -Force | Out-Null
 # Only Buffy-owned files are copied. No sibling addon or SavedVariables file is touched.
 Copy-Item -Path (Join-Path $stage 'Buffy\*') -Destination $target -Recurse -Force
 Write-Host "Deployed Buffy to $target"
-
 if ($Probe) {
-    # ForeverProbe's own deploy (-Module, ForeverProbe#47): the host, then BuffyProbe. It checks the
-    # module again (TOC dependency, listed files, luac -p) and copies nothing if one fails, stamps
-    # the copy's TOC with the commit, lints its globals and removes files the module no longer lists.
-    & pwsh -NoProfile -File (Join-Path $foreverProbe 'Tools\deploy.ps1') -AddOnsPath $addons -Module $probeDir -Lua $Lua
-    if ($LASTEXITCODE -ne 0) { throw 'ForeverProbe deploy -Module refused; no probe was copied' }
     Write-Host "Deployed BuffyProbe to $(Join-Path $addons 'BuffyProbe'). /reload, then /fp steps bf pin." -ForegroundColor Cyan
 }

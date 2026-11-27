@@ -1,6 +1,6 @@
 # WowTestKit for these tests: the commit, and the client build to test against.
 # build=71037 is only which build's API lists the kit checks against, not a build Buffy was
 # measured on (#72). It moves when a test needs a newer build's data, or at an Interface bump.
-sha=a9b2ee01084b9a8e05c11a72edb59a1245e428bc
+sha=87ca66e025c87b784b678b5d2bb155886913ffd2
 build=71037
 api=2

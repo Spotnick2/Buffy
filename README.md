@@ -67,6 +67,9 @@ Disable the matching original addon when using Buffy to avoid duplicate buff win
   their buffs. Buffy can't tell in advance whose buff is stronger than yours, so the first cast on
   that member still fails, and when everyone left has been refused the click casts nothing. You
   can still pick them yourself from the member list.
+- Buffy learns how long each buff lasts from the buffs it sees, and times a buff with that when
+  the game doesn't report its length. What it learned is kept through game updates and relearned
+  only when the game's Interface version changes. After updating to 1.0.5, it relearns once.
 
 ## GlassUI
 

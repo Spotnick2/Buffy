@@ -5,7 +5,7 @@ Author: Spotnick. CurseForge project: 1760483. Lua 5.1 only; Vanilla content on 
 
 ## Architecture
 
-- BuffyCompat.lua is the only library bootstrap and reporter. It requires LibGroupBuffs minor 33 (`NEEDS_MINOR`).
+- BuffyCompat.lua is the only library bootstrap and reporter. It requires LibGroupBuffs minor 40 (`NEEDS_MINOR`, kept equal to the `.pkgmeta` pin).
 - Classes/Priest.lua, Druid.lua, Mage.lua contain definitions, defaults, instance data,
   targeting rules, spec appearance, and reagent data adapted from the original addons.
 - Buffy.lua selects one class at ADDON_LOADED, creates exactly one engine/UI/visibility

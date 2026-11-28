@@ -149,6 +149,16 @@ Bugsy logged no Buffy or LibGroupBuffs error. Only the single-target click was c
 Fortitude on a refused member, and an action-bar or macro bounce teaching the window, are
 unmeasured in Buffy. The client build wasn't recorded.
 
+## No build check, LibGroupBuffs 52b6f9e = r40 (#78), 2026-11-28
+
+The r40 pilot (LibGroupBuffs#101): Buffy main 1422d2e with library `52b6f9e`, later tagged r40, and
+LibGlass r13, on client 1.60.1.71139. The deployed library declared MINOR 40. Priestly, Magely and
+Wildly still embedded r39, but LibStub keeps the highest minor. The owner did a full exit, a real
+login and a `/reload` in both clients, and saw no "tested on game build" line ("it works").
+Bugsy, read from both accounts after the reloads, had no problem in either session and none ever
+from `AddOns/Buffy/`. Nothing else was checked on r40. #78 then dropped `measuredOnBuild` and the
+`newBuild` filter, which r40 ignores and never sends.
+
 ## GlassUI integration
 
 GlassUI PR #160, the hub roster entry, merged on 2026-10-24 UTC. GlassUI itself is not

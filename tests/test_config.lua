@@ -42,8 +42,8 @@ H.eq(B.Get("autoBuyGift"), false, "Druid restock disabled independently")
 H.eq(B.Get("giftTarget"), 80, "invalid Gift target repaired")
 
 -- #72: no build is announced or recorded, not even by a development copy (the unpackaged
--- TOC's version token). The stub's build (WoW.build) is not the library's measuredOnBuild,
--- so the library does report newBuild.
+-- TOC's version token). LibGroupBuffs r40 has no build check (LibGroupBuffs #101), and Buffy
+-- passes it no build (#78).
 local function printed(pattern)
     for _, line in ipairs(WoW.messages) do if line:find(pattern) then return line end end
 end

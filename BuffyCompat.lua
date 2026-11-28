@@ -26,7 +26,7 @@ Buffy = Buffy or {}
 -- lib:New arrived, and r28 where lib:Refusal says why it refused; this file
 -- is written against both. Keep this equal to the MINOR .pkgmeta pins;
 -- tests/test_manifest.lua checks the literal, so update both together.
-local NEEDS_MINOR = 33
+local NEEDS_MINOR = 40
 
 -- Buffy's own record of the events this client rejected, for
 -- `/dump Buffy.eventFailures`. The library also keeps it, as
@@ -34,7 +34,7 @@ local NEEDS_MINOR = 33
 Buffy.eventFailures = Buffy.eventFailures or {}
 
 -- Per-kind rewording for the one reporter below, filled in by the files that
--- own each kind (BuffyConfig.lua: newBuild, settingsLoaded). Looked up when
+-- own each kind (BuffyConfig.lua: settingsLoaded). Looked up when
 -- a report arrives, so a filter installed after this file loads is the one
 -- that runs. A filter returns the text to print, or nil to say nothing.
 Buffy.reportFilters = Buffy.reportFilters or {}

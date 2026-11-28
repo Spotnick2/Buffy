@@ -42,8 +42,8 @@ frames in combat. Let the library defer the operation. Register events through B
 Libraries are sibling checkouts or explicit paths, never committed in Libs/.
 
 ```powershell
-pwsh tests/run.ps1 -Library .work/LibGroupBuffs-r39 -LibGlass .work/LibGlass-r13
-pwsh Tools/package.ps1 -Library .work/LibGroupBuffs-r39 -LibGlass .work/LibGlass-r13
+pwsh tests/run.ps1 -Library .work/LibGroupBuffs-r40 -LibGlass .work/LibGlass-r13
+pwsh Tools/package.ps1 -Library .work/LibGroupBuffs-r40 -LibGlass .work/LibGlass-r13
 ```
 
 The companion changes are merged (LibGroupBuffs #69 and #70, GlassUI #160). The .work
@@ -78,12 +78,13 @@ authoritative for the WoW code-review method and verdict.
 
 ## Packaging and release
 
-.pkgmeta embeds LibGlass r13 (`5b2c9ab`) and LibGroupBuffs r39 (3fab1f9, minor 39). Pin tags only:
+.pkgmeta embeds LibGlass r13 (`5b2c9ab`) and LibGroupBuffs r40 (52b6f9e, minor 40). Pin tags only:
 v0.1.1-alpha1 and -alpha2 pinned the same library commit by `commit:`, and CurseForge's tag
 webhook built no file for either, so a library pilot gets a tag first. v0.1.0 shipped on r32,
 v1.0.0-beta1 on r33, v1.0.0 and v1.0.1 on r34. v1.0.0 and v1.0.1 shipped LibGlass r11; main pins
-LibGlass r13 since 2026-11-18, and LibGroupBuffs r39 (refusal memory, #97) since #68, after its
-in-game pilot on that commit (r37 and r38 were never tagged).
+LibGlass r13 since 2026-11-18. It pinned LibGroupBuffs r39 (refusal memory, #97) from #68, after
+its in-game pilot on that commit (r37 and r38 were never tagged), and r40 (no build check,
+LibGroupBuffs#101) since #78, after its pilot on 52b6f9e on 2026-11-28.
 Never use latest.
 Include dependency licenses. Exclude tests, Tools, docs, .work, and the source PNG from packages.
 

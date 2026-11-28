@@ -64,10 +64,6 @@ function B.InitConfig()
             { label = "class profile", get = B.Profile },
             { label = "per-character", get = Character },
         },
-        -- LibGroupBuffs r39 requires it and reports "newBuild" at a login on any other build.
-        -- Buffy prints nothing for it (the filter below). Dropped when the library drops the
-        -- check (LibGroupBuffs #101).
-        measuredOnBuild = "71037",
         onChanged = function(key) if B.OnConfigChanged then B.OnConfigChanged(key) end end,
     })
     for k, v in pairs(B.class.defaults) do
@@ -108,10 +104,6 @@ function B.InitConfig()
     Account().seenBuild = nil
     interface = ClientInterface()
 end
-
--- A new build with the same Interface is not a re-check, so Buffy announces no build (#72),
--- not even on a development copy.
-B.reportFilters.newBuild = function() return nil end
 
 function B.EnteringWorld(initial, reload)
     if settings then settings:HandleEnteringWorld(initial, reload) end

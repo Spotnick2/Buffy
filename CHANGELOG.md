@@ -7,6 +7,8 @@
   learn them again. After this update they are relearned once.
 - A development copy no longer prints a "Client build" line at login or saves the build it saw
   (#72). Released copies did neither.
+- Embeds LibGroupBuffs r40, which no longer checks the game build at login (#78). Nothing changes
+  in game.
 
 ## v1.0.4 - 2026-11-25
 

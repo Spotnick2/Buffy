@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.0.5 - 2026-11-28
 
 - Buff durations Buffy learned are now kept when the game updates, and relearned only when the
   game's Interface version changes. Until now every client build, about twice a week, made Buffy

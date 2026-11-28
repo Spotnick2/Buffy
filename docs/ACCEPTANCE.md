@@ -159,6 +159,13 @@ Bugsy, read from both accounts after the reloads, had no problem in either sessi
 from `AddOns/Buffy/`. Nothing else was checked on r40. #78 then dropped `measuredOnBuild` and the
 `newBuild` filter, which r40 ignores and never sends.
 
+After #78 (and #80), Buffy main f4f843f with r40 and LibGlass r13 was deployed with `-Probe` on the
+same client, the first real deploy through ForeverProbe's `-Module` (#77). After a `/reload`
+(account SPOTNICK2), BuffyProbe reported `deployed f4f843f` and `/fp bf` listed its commands.
+Bugsy's session had no problem, and none from `AddOns/Buffy/` or `AddOns/BuffyProbe/`. This is
+the v1.0.5 code. Durations kept across a client build (#72) are covered by tests only: the next
+build is the first chance to see it.
+
 ## GlassUI integration
 
 GlassUI PR #160, the hub roster entry, merged on 2026-10-24 UTC. GlassUI itself is not
